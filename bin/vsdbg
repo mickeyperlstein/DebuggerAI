@@ -1,0 +1,189 @@
+#!/usr/bin/env node
+/**
+ * vsdbg — thin CLI client for the DebuggingAI VS Code extension.
+ *
+ * The extension runs an HTTP server on localhost:7890.
+ * This script is a thin wrapper that serialises CLI arguments into
+ * an ApiRequest, POSTs it, and prints the JSON result.
+ *
+ * pdb-familiar usage:
+ *   vsdbg +bp app.py:42                          # unconditional
+ *   vsdbg +bp app.py:42 condition:{x > 100}      # conditional
+ *   vsdbg bp edit <id> condition:{x > 100}        # edit condition
+ *   vsdbg bp list                                 # list all
+ *   vsdbg bp clear <id>                           # remove one
+ *   vsdbg bp clear --all                          # remove all
+ */
+
+'use strict';
+
+const http = require('http');
+
+const PORT = parseInt(process.env.VSDBG_PORT ?? '7890', 10);
+const HOST = '127.0.0.1';
+
+// ── Parse CLI args ──────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
+
+function usage() {
+  console.log(`
+vsdbg — DebuggingAI CLI
+
+Usage:
+  vsdbg +bp <file>:<line>                         Set breakpoint
+  vsdbg +bp <file>:<line> condition:{<expr>}      Set conditional breakpoint
+  vsdbg bp list                                   List all breakpoints
+  vsdbg bp edit <id> condition:{<expr>}           Edit breakpoint condition
+  vsdbg bp edit <id> enable                       Enable breakpoint
+  vsdbg bp edit <id> disable                      Disable breakpoint
+  vsdbg bp clear <id>                             Remove a breakpoint
+  vsdbg bp clear --all                            Remove all breakpoints
+
+Environment:
+  VSDBG_PORT   Extension server port (default: 7890)
+`);
+  process.exit(0);
+}
+
+if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
+  usage();
+}
+
+let request = null;
+
+// vsdbg +bp app.py:42 [condition:{expr}]
+if (args[0] === '+bp') {
+  const loc = args[1];
+  if (!loc) { die('usage: vsdbg +bp <file>:<line> [condition:{<expr>}]'); }
+
+  const colonIdx = loc.lastIndexOf(':');
+  if (colonIdx === -1) { die(`invalid location "${loc}" — expected file:line`); }
+
+  const file = loc.slice(0, colonIdx);
+  const line = parseInt(loc.slice(colonIdx + 1), 10);
+  if (isNaN(line) || line < 1) { die(`invalid line number in "${loc}"`); }
+
+  let condition = null;
+  const condArg = args[2];
+  if (condArg) {
+    const m = condArg.match(/^condition:\{(.*)\}$/s);
+    if (!m) { die(`invalid condition format "${condArg}" — expected condition:{<expr>}`); }
+    const expr = m[1].trim();
+    condition = expr === 'True' || expr === '' ? null : expr;
+  }
+
+  request = { command: 'set', file, line, condition };
+
+// vsdbg bp list / edit / clear
+} else if (args[0] === 'bp') {
+  const sub = args[1];
+
+  if (sub === 'list') {
+    request = { command: 'list' };
+
+  } else if (sub === 'clear') {
+    if (args[2] === '--all') {
+      request = { command: 'clearAll' };
+    } else if (args[2]) {
+      request = { command: 'clear', id: args[2] };
+    } else {
+      die('usage: vsdbg bp clear <id> | --all');
+    }
+
+  } else if (sub === 'edit') {
+    const id = args[2];
+    if (!id) { die('usage: vsdbg bp edit <id> condition:{<expr>} | enable | disable'); }
+
+    const changeArg = args[3];
+    const changes = { id };
+
+    if (!changeArg) { die('specify what to change: condition:{expr} | enable | disable'); }
+
+    if (changeArg === 'enable')  { Object.assign(changes, { enabled: true }); }
+    else if (changeArg === 'disable') { Object.assign(changes, { enabled: false }); }
+    else {
+      const m = changeArg.match(/^condition:\{(.*)\}$/s);
+      if (!m) { die(`invalid argument "${changeArg}"`); }
+      Object.assign(changes, { condition: m[1].trim() || null });
+    }
+
+    request = { command: 'edit', ...changes };
+
+  } else {
+    die(`unknown subcommand "bp ${sub}"`);
+  }
+
+} else {
+  die(`unknown command "${args[0]}"`);
+}
+
+// ── Send to extension server ────────────────────────────────────────────────
+
+post(request).then(result => {
+  if (result.ok) {
+    // Print pdb-style confirmation + machine-readable JSON
+    if (result.breakpoint) {
+      const bp = result.breakpoint;
+      const cond = bp.condition ? ` (condition: ${bp.condition})` : '';
+      console.log(`Breakpoint at ${bp.file}:${bp.line}${cond}  [id: ${bp.id}]`);
+    } else if (result.breakpoints !== undefined) {
+      if (result.breakpoints.length === 0) {
+        console.log('(no breakpoints)');
+      } else {
+        console.log('Num  Enb  Location                           Condition');
+        result.breakpoints.forEach((bp, i) => {
+          const n   = String(i + 1).padEnd(4);
+          const enb = bp.enabled ? 'yes' : 'no ';
+          const loc = `${bp.file}:${bp.line}`.padEnd(35);
+          const c   = bp.condition ?? '—';
+          console.log(`${n} ${enb}  ${loc} ${c}`);
+        });
+        console.log();
+      }
+    }
+    // Always print full JSON for machine readers
+    console.log(JSON.stringify(result));
+  } else {
+    console.error(`error: ${result.error}`);
+    process.exit(1);
+  }
+}).catch(err => {
+  if (err.code === 'ECONNREFUSED') {
+    console.error(
+      `error: could not connect to DebuggingAI extension on port ${PORT}\n` +
+      `Make sure the DebuggingAI VS Code extension is installed and VS Code is running.`
+    );
+  } else {
+    console.error(`error: ${err.message}`);
+  }
+  process.exit(1);
+});
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function post(body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const req = http.request(
+      { hostname: HOST, port: PORT, path: '/', method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } },
+      res => {
+        let raw = '';
+        res.on('data', c => (raw += c));
+        res.on('end', () => {
+          try { resolve(JSON.parse(raw)); }
+          catch { reject(new Error('invalid JSON from server')); }
+        });
+      },
+    );
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
+function die(msg) {
+  console.error(`vsdbg: ${msg}`);
+  process.exit(1);
+}

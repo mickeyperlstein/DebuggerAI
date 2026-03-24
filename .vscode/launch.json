@@ -1,0 +1,87 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    // ── 0. Run integration tests (shows results in VS Code Test Explorer) ────
+    {
+      "name": "Integration Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index",
+        "--user-data-dir=/tmp/vscode-debuggingai-test"
+      ],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "preLaunchTask": "compile",
+      "sourceMaps": true
+    },
+
+
+
+    // ── 1. Run the extension in a real VS Code window ────────────────────────
+    // Press F5. Opens an Extension Development Host with DebuggingAI active.
+    // This is how you manually test commands, gutter breakpoints, output channel.
+    {
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "preLaunchTask": "compile"
+    },
+
+    // ── 2. Debug the extension itself (breakpoints in extension.ts etc.) ─────
+    // Same as above but you can set breakpoints in src/extension.ts,
+    // src/breakpoints.ts, src/server.ts and they will hit.
+    {
+      "name": "Debug Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "sourceMaps": true,
+      "preLaunchTask": "compile"
+    },
+
+    // ── 3. Run Jest unit tests (breakpoints.test.ts etc.) ───────────────────
+    // Lets you set breakpoints inside the test files and step through them.
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand", "--testPathPattern", "${fileBasenameNoExtension}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+
+    // ── 4. Debug test_app.py — the fake Python script ────────────────────────
+    // Requires the Python VS Code extension + debugpy installed (pip install debugpy).
+    // Set breakpoints via "DebuggingAI: Set Breakpoint" then launch this config.
+    // This is how you prove the extension actually places breakpoints correctly.
+    {
+      "name": "Debug test_app.py",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/test_app.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "stopOnEntry": true
+    },
+
+    // ── 5. Debug the vsdbg CLI script directly ───────────────────────────────
+    // Set breakpoints in bin/vsdbg, run it with args.
+    {
+      "name": "Debug vsdbg CLI",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/vsdbg",
+      "args": ["+bp", "app.py:42", "condition:{x > 100}"],
+      "console": "integratedTerminal"
+    }
+
+  ]
+}

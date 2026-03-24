@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm test:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(/opt/homebrew/bin/jq -r '.tool_input.command'); if echo \"$cmd\" | grep -q 'git commit'; then npm run lint && npm test; fi",
+            "timeout": 60,
+            "statusMessage": "Running lint + tests before commit..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(/opt/homebrew/bin/jq -r '.tool_input.command'); if echo \"$cmd\" | grep -q 'npm run compile'; then npm test; fi",
+            "timeout": 60,
+            "statusMessage": "Running tests after compile..."
+          }
+        ]
+      }
+    ]
+  }
+}
