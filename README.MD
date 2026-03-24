@@ -42,8 +42,8 @@ Every action is logged as structured JSON to the **DebuggingAI** Output channel.
 | Sprint | Feature |
 |---|---|
 | ✅ 1 | Breakpoint management |
-| 2 | Session lifecycle — start, stop, restart any `launch.json` config |
-| 3 | Execution control — continue, next, step, return, until, jump |
+| ✅ 2 | Session lifecycle — start, stop, restart any `launch.json` config |
+| ✅ 3 | Execution control — continue, next, step, return, until, jump |
 | 4 | Inspection — print, pp, whatis, display, args, retval |
 | 5 | Stack navigation — backtrace, up, down |
 | 6 | Source listing — list, longlist |
