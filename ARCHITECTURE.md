@@ -1,8 +1,12 @@
-# DebuggerAI Rearchitecture — Claude Code Prompt
+# DebuggingAI — Architecture
+
+> Sprint N+1 (SOLID decomposition + architecture inversion): ✅ COMPLETE
+> Sprint N+2 (DapClient + standalone strategies): planned
+> Sprint N+3 (Terminal/MCP path): planned
 
 ## Context
 
-You are refactoring DebuggerAI from a VS Code-dependent extension into an IDE-agnostic, DAP-centric debugging platform. The goal is to enable any AI agent to debug any DAP-compatible language (Python, Node, Go, Dart, etc.) via either:
+DebuggingAI is an IDE-agnostic, DAP-centric debugging platform. Any AI agent can debug any DAP-compatible language (Python, Node, Go, Dart, etc.) via either:
 - **Path A:** VS Code extension (human + AI)
 - **Path B:** Terminal/MCP server (AI only)
 
