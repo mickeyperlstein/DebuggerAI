@@ -1,8 +1,10 @@
 import * as http from 'http';
+import { WebSocketServer } from 'ws';
 import { BreakpointManager } from './breakpoints';
 import { SessionManager } from './session';
 import { ApiRequest, BpResult, BpListResult } from './types';
 import { SessionResult, StepResult, InspectResult } from './interfaces/IDebugger';
+import { ClientRegistry } from './server/ClientRegistry';
 import { log } from './log';
 
 type Response = BpResult | BpListResult | SessionResult | StepResult | InspectResult;
@@ -19,8 +21,20 @@ export class Server {
     private readonly mgr: BreakpointManager,
     private readonly sm: SessionManager,
     private readonly port: number,
+    registry?: ClientRegistry,
   ) {
     this.srv = http.createServer((req, res) => this.handle(req, res));
+
+    // WHAT: Attach a WebSocket server to the same port as the HTTP API.
+    // WHY:  The VS Code extension connects here as a thin client, streams debug
+    //       events, and executes commands on behalf of the standalone server.
+    //       Port sharing (HTTP + WS on 7890) keeps the setup to one process.
+    // WHEN: Only wired when a ClientRegistry is provided (standalone mode).
+    //       In tests the registry is omitted so existing tests are unaffected.
+    if (registry) {
+      const wss = new WebSocketServer({ server: this.srv, path: '/__ws' });
+      wss.on('connection', ws => registry.register(ws));
+    }
   }
 
   start = () => new Promise<void>((ok, fail) => {

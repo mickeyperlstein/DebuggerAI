@@ -19,32 +19,56 @@ Agent (Claude / Cline / any)
   Your running program
 ```
 
-## Current feature set — Sprint 1
+## Feature set
 
-**Breakpoint management** — the full pdb `b` / `cl` / `enable` / `disable` surface:
+**All commands are callable over HTTP on port 7890** — any agent can drive them with `curl`, no VS Code knowledge required.
 
-| Command | What it does |
-|---|---|
-| `DebuggingAI: Set Breakpoint` | Set a breakpoint at the cursor line, optional condition |
-| `DebuggingAI: Edit Breakpoint` | Change condition, line, or enabled state by ID |
-| `DebuggingAI: List Breakpoints` | Print all breakpoints as a JSON table to the Output channel |
-| `DebuggingAI: Clear Breakpoint` | Remove one breakpoint by ID |
-| `DebuggingAI: Clear All Breakpoints` | Remove every breakpoint in the session |
+### Breakpoints
+| Command | HTTP | What it does |
+|---|---|---|
+| `DebuggingAI: Set Breakpoint` | `POST /breakpoints` | Set breakpoint at file:line, optional condition |
+| `DebuggingAI: Edit Breakpoint` | `PATCH /breakpoints/:id` | Change condition or enabled state |
+| `DebuggingAI: List Breakpoints` | `GET /breakpoints` | List all breakpoints as JSON |
+| `DebuggingAI: Clear Breakpoint` | `DELETE /breakpoints/:id` | Remove one breakpoint |
+| `DebuggingAI: Clear All Breakpoints` | `DELETE /breakpoints` | Remove all breakpoints |
 
-All commands are also callable over a local HTTP server on port 7890 — any bash-based agent can drive them with `curl`.
+### Session lifecycle
+| Command | HTTP | What it does |
+|---|---|---|
+| `DebuggingAI: Start Debug Session` | `POST /session/start` | Launch a `launch.json` config by name |
+| `DebuggingAI: Stop Debug Session` | `POST /session/stop` | Stop the active session |
+| `DebuggingAI: Restart Debug Session` | `POST /session/restart` | Restart the active session |
+| `DebuggingAI: Session Status` | `GET /session/status` | Active session info |
 
-Breakpoints set manually in the editor gutter are automatically synced into the extension's store so `List` always shows the full picture.
+### Execution control
+| Command | HTTP | What it does |
+|---|---|---|
+| `DebuggingAI: Continue` | `POST /execution/continue` | Resume until next breakpoint |
+| `DebuggingAI: Next` | `POST /execution/next` | Step over |
+| `DebuggingAI: Step` | `POST /execution/step` | Step into |
+| `DebuggingAI: Return` | `POST /execution/return` | Step out |
+| `DebuggingAI: Until Line` | `POST /execution/until` | Run until line |
+| `DebuggingAI: Jump to Line` | `POST /execution/jump` | Jump to line |
 
-Every action is logged as structured JSON to the **DebuggingAI** Output channel.
+### Inspection
+| Command | HTTP | What it does |
+|---|---|---|
+| `DebuggingAI: Print Expression` | `POST /inspect/print` | Evaluate and print |
+| `DebuggingAI: Pretty-Print Expression` | `POST /inspect/pp` | Pretty-print |
+| `DebuggingAI: What Is` | `POST /inspect/whatis` | Type of expression |
+| `DebuggingAI: Display Expression` | `POST /inspect/display` | Watch an expression |
+| `DebuggingAI: Undisplay Expression` | `DELETE /inspect/display` | Remove watch |
+| `DebuggingAI: Show Function Arguments` | `POST /inspect/args` | Current frame args |
+| `DebuggingAI: Show Return Value` | `POST /inspect/retval` | Last return value |
 
 ## Roadmap
 
 | Sprint | Feature |
 |---|---|
 | ✅ 1 | Breakpoint management |
-| ✅ 2 | Session lifecycle — start, stop, restart any `launch.json` config |
-| ✅ 3 | Execution control — continue, next, step, return, until, jump |
-| 4 | Inspection — print, pp, whatis, display, args, retval |
+| ✅ 2 | Session lifecycle |
+| ✅ 3 | Execution control |
+| ✅ 4 | Inspection — print, pp, whatis, display, args, retval |
 | 5 | Stack navigation — backtrace, up, down |
 | 6 | Source listing — list, longlist |
 

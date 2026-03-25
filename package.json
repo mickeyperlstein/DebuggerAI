@@ -4,6 +4,16 @@
   "description": "Universal debugger control for any AI agent — Claude, Cline, Cursor, and more",
   "version": "0.1.0",
   "publisher": "mickeyperlstein",
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mickeyperlstein/DebuggingAI"
+  },
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -21,8 +31,7 @@
     "vsdbg"
   ],
   "activationEvents": [
-    "onStartupFinished",
-    "*"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -136,9 +145,9 @@
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts",
     "test": "jest --runInBand",
-    "test:vscode": "npm run compile && node out/test/runTest.js",
-    "test:http": "npm run compile && node out/test/http/runHttpTests.js",
+    "server": "npm run compile && node out/bin/server.js",
     "test:vscode": "npm run compile && vscode-test",
+    "test:http": "npm run compile && node out/test/http/runHttpTests.js",
     "test:e2e": "npm run compile && extest setup-and-run out/e2e/**/*.e2e.js --mocha_config .mocharc.e2e.js --code_version 1.96.4"
   },
   "jest": {
@@ -170,6 +179,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vscode/test-cli": "^0.0.12",
@@ -182,5 +192,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.0",
     "vscode-extension-tester": "^8.23.0"
+  },
+  "dependencies": {
+    "ws": "^8.20.0"
   }
 }
