@@ -40,10 +40,29 @@ Node.js: ✅ all pass
 TypeScript: ✅ all pass
 Python: ❌ 5 tests failing (see python-frameid-investigation.md)
 
-## Sprint 5 — Go Language Target 🔲 NOT STARTED
+## Sprint 5 (N+1) — Refactor extension.ts + Fix Python 🔲 NOT STARTED
 
-Mickey wants Go added to the integration test matrix alongside Node.js, TypeScript, Python.
-Will need: `test_app.go`, Go launch config in `.vscode/launch.json`, `makeInspectionSuite` target in sprint4.test.ts.
+Per `REARCHITECTURE_PROMPT.md` in project root:
+1. Fix Python frameId via `PythonStrategy` (isolates the quirk, doesn't pollute global code)
+2. Extract from `extension.ts`:
+   - `src/adapters/VsCodeBreakpointAdapter.ts` (IDebugAdapter impl)
+   - `src/adapters/VsCodeDapProxy.ts` (stoppedBus + DAP tracker)
+   - `src/adapters/VsCodeSessionAdapter.ts` (ISessionAdapter impl)
+   - `src/commands/VsCodeCommandRegistry.ts` (registerCommand calls)
+3. `extension.ts` becomes thin composition root (~20 lines)
+
+## Sprint 6 (N+2) — DAP Client + Language Strategies 🔲 NOT STARTED
+
+- `src/dap/DapClient.ts` — standalone stdio/TCP DAP communication
+- `src/strategies/PythonStrategy.ts`, `NodeStrategy.ts`, `GoStrategy.ts`
+- `src/adapters/TerminalSessionAdapter.ts` — ISessionAdapter using DapClient (no vscode)
+- Go language target added to integration test matrix
+
+## Sprint 7 (N+3) — Terminal/MCP Path 🔲 NOT STARTED
+
+- CLI entry point using SessionManager + DapClient
+- MCP server exposing SessionManager operations as MCP tools
+- E2E tests for terminal and MCP paths (no VS Code required)
 
 ## Test Infrastructure
 

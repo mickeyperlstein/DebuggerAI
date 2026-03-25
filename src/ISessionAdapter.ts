@@ -12,6 +12,12 @@ export interface StopEvent {
   reason: StopReason;
   /** DAP frame ID — cached so inspection commands can evaluate in the current frame. */
   frameId?: number;
+  /**
+   * The thread ID from the stop event.
+   * Carried by VsCodeDapProxy so strategies (e.g. PythonStrategy) can issue a
+   * fresh stackTrace request at evaluate time to resolve the raw adapter frame ID.
+   */
+  threadId?: number;
 }
 
 /** DAP step commands mapped to their protocol names. */
