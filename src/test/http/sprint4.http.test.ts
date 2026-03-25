@@ -54,7 +54,7 @@ function post(body: object): Promise<any> {
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-async function teardown(): Promise<void> {
+async function cleanupSession(): Promise<void> {
   await post({ command: 'quit' });
   await post({ command: 'clearAll' });
   await new Promise(r => setTimeout(r, 500));
@@ -82,7 +82,7 @@ function makeSuite(t: Target): void {
 
     teardown(async function (this: Mocha.Context) {
       this.timeout(10_000);
-      await teardown();
+      await cleanupSession();
     });
 
     async function runToBp(ctx: Mocha.Context): Promise<any> {

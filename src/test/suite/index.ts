@@ -7,7 +7,7 @@ export async function run(): Promise<void> {
   const dir   = __dirname;
 
   fs.readdirSync(dir)
-    .filter(f => f.endsWith('.test.js'))
+    .filter(f => f.endsWith('.vscode.test.js'))
     .forEach(f => mocha.addFile(path.join(dir, f)));
 
   return new Promise((resolve, reject) =>

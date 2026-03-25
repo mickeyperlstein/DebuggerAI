@@ -136,7 +136,7 @@
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts",
     "test": "jest --runInBand",
-    "test:integration": "npm run compile && node out/test/runTest.js",
+    "test:vscode": "npm run compile && node out/test/runTest.js",
     "test:http": "npm run compile && node out/test/http/runHttpTests.js",
     "test:vscode": "npm run compile && vscode-test",
     "test:e2e": "npm run compile && extest setup-and-run out/e2e/**/*.e2e.js --mocha_config .mocharc.e2e.js --code_version 1.96.4"
