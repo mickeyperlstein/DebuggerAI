@@ -194,6 +194,7 @@
     "vscode-extension-tester": "^8.23.0"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
     "ws": "^8.20.0"
   }
 }
