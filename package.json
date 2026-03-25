@@ -20,7 +20,10 @@
     "pdb",
     "vsdbg"
   ],
-  "activationEvents": ["onStartupFinished", "*"],
+  "activationEvents": [
+    "onStartupFinished",
+    "*"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -83,6 +86,38 @@
       {
         "command": "debuggingAI.jump",
         "title": "DebuggingAI: Jump to Line"
+      },
+      {
+        "command": "debuggingAI.print",
+        "title": "DebuggingAI: Print Expression"
+      },
+      {
+        "command": "debuggingAI.prettyPrint",
+        "title": "DebuggingAI: Pretty-Print Expression"
+      },
+      {
+        "command": "debuggingAI.whatis",
+        "title": "DebuggingAI: What Is (type of expression)"
+      },
+      {
+        "command": "debuggingAI.exec",
+        "title": "DebuggingAI: Exec Statement"
+      },
+      {
+        "command": "debuggingAI.display",
+        "title": "DebuggingAI: Display Expression"
+      },
+      {
+        "command": "debuggingAI.undisplay",
+        "title": "DebuggingAI: Undisplay Expression"
+      },
+      {
+        "command": "debuggingAI.args",
+        "title": "DebuggingAI: Show Function Arguments"
+      },
+      {
+        "command": "debuggingAI.retval",
+        "title": "DebuggingAI: Show Return Value"
       }
     ],
     "configuration": {
@@ -111,9 +146,18 @@
     "testMatch": [
       "**/src/__tests__/**/*.test.ts"
     ],
-    "testPathIgnorePatterns": ["/node_modules/", "/out/", "/.vscode-test/"],
-    "watchPathIgnorePatterns": ["/.vscode-test/"],
-    "modulePathIgnorePatterns": ["<rootDir>/out/", "<rootDir>/.vscode-test/"],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/out/",
+      "/.vscode-test/"
+    ],
+    "watchPathIgnorePatterns": [
+      "/.vscode-test/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/out/",
+      "<rootDir>/.vscode-test/"
+    ],
     "moduleNameMapper": {
       "^vscode$": "<rootDir>/src/__mocks__/vscode.ts"
     }
@@ -134,6 +178,7 @@
     "jest": "^29.0.0",
     "mocha": "^11.7.5",
     "ts-jest": "^29.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.0",
     "vscode-extension-tester": "^8.23.0"
   }

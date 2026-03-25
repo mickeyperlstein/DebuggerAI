@@ -2,10 +2,10 @@ import * as http from 'http';
 import { BreakpointManager } from './breakpoints';
 import { SessionManager } from './session';
 import { ApiRequest, BpResult, BpListResult } from './types';
-import { SessionResult } from './interfaces/IDebugger';
+import { SessionResult, StepResult, InspectResult } from './interfaces/IDebugger';
 import { log } from './log';
 
-type Response = BpResult | BpListResult | SessionResult;
+type Response = BpResult | BpListResult | SessionResult | StepResult | InspectResult;
 
 /**
  * Thin HTTP server — localhost only.
@@ -48,6 +48,7 @@ export class Server {
   private dispatch(r: ApiRequest): Response | Promise<Response> {
     const { mgr, sm } = this;
     const handlers: Record<ApiRequest['command'], () => Response | Promise<Response>> = {
+      // Sprint 1 — breakpoints
       set:      () => !r.file || !r.line ? { ok: false, error: 'set requires file + line' }
                                          : mgr.set(r.file, r.line, r.condition ?? null, r.temporary),
       edit:     () => !r.id ? { ok: false, error: 'edit requires id' }
@@ -55,10 +56,27 @@ export class Server {
       clear:    () => !r.id ? { ok: false, error: 'clear requires id' } : mgr.clear(r.id),
       clearAll: () => mgr.clearAll(),
       list:     () => mgr.list(),
+      // Sprint 2 — session lifecycle
       start:    () => !r.config ? { ok: false, state: 'idle', error: 'start requires config' } : sm.start(r.config),
       quit:     () => sm.quit(),
       restart:  () => sm.restart(),
       status:   () => sm.status(),
+      // Sprint 3 — execution control
+      continue: () => sm.continue(),
+      next:     () => sm.next(),
+      step:     () => sm.step(),
+      return:   () => sm.return(),
+      until:    () => sm.until(r.line),
+      jump:     () => r.line === undefined ? { ok: false, state: 'paused', error: 'jump requires line' } : sm.jump(r.line),
+      // Sprint 4 — inspection
+      print:       () => !r.expression ? { ok: false, error: 'print requires expression' }       : sm.print(r.expression),
+      prettyPrint: () => !r.expression ? { ok: false, error: 'prettyPrint requires expression' } : sm.prettyPrint(r.expression),
+      whatis:      () => !r.expression ? { ok: false, error: 'whatis requires expression' }      : sm.whatis(r.expression),
+      exec:        () => !r.expression ? { ok: false, error: 'exec requires expression' }        : sm.exec(r.expression),
+      display:     () => sm.display(r.expression),
+      undisplay:   () => sm.undisplay(r.expression),
+      args:        () => sm.args(),
+      retval:      () => sm.retval(),
     };
     return (handlers[r.command] ?? (() => ({ ok: false, error: `unknown: ${r.command}` })))();
   }

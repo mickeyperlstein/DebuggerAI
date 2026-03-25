@@ -68,11 +68,36 @@
       "request": "launch",
       "program": "${workspaceFolder}/test_app.py",
       "console": "integratedTerminal",
-      "justMyCode": true,
       "stopOnEntry": true
     },
 
-    // ── 5. Debug the vsdbg CLI script directly ───────────────────────────────
+    // ── 5. Debug test_app.js — the fake Node.js script ───────────────────────
+    // Requires no extra tooling — pure Node.js.
+    // Set breakpoints via "DebuggingAI: Set Breakpoint" then launch this config.
+    {
+      "name": "Debug test_app.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/test_app.js",
+      "console": "integratedTerminal",
+      "stopOnEntry": true
+    },
+
+    // ── 6. Debug test_app.ts — the fake TypeScript script ────────────────────
+    // Requires ts-node (already a devDependency: npm install).
+    // Debugs TypeScript source directly with source maps — no manual compile step.
+    {
+      "name": "Debug test_app.ts",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/test_app.ts"],
+      "console": "integratedTerminal",
+      "stopOnEntry": true,
+      "env": { "TS_NODE_TRANSPILE_ONLY": "true" }
+    },
+
+    // ── 7. Debug the vsdbg CLI script directly ───────────────────────────────
     // Set breakpoints in bin/vsdbg, run it with args.
     {
       "name": "Debug vsdbg CLI",

@@ -10,10 +10,15 @@ export interface StopEvent {
   line: number;
   function?: string;
   reason: StopReason;
+  /** DAP frame ID — cached so inspection commands can evaluate in the current frame. */
+  frameId?: number;
 }
 
 /** DAP step commands mapped to their protocol names. */
 export type ExecCmd = 'continue' | 'next' | 'stepIn' | 'stepOut';
+
+/** Return type of adapter.evaluate — either a value or an error string. */
+export type EvalResult = { result: string; type?: string } | { error: string };
 
 export interface ISessionAdapter {
   /** Start a named launch config. Returns null if config not found. */
@@ -28,4 +33,12 @@ export interface ISessionAdapter {
   sendUntil(file: string, line: number): Promise<StopEvent | null>;
   /** Set the next statement via DAP goto. Returns error shape if not allowed. */
   sendJump(file: string, line: number): Promise<StopEvent | { ok: false; error: string }>;
+
+  // Sprint 4 — inspection (DAP evaluate / scopes / variables)
+  /** Evaluate an expression in the given frame. Returns error shape on failure. */
+  evaluate(expression: string, frameId: number, context?: string): Promise<EvalResult>;
+  /** Fetch DAP scopes for a frame (used by args()). */
+  scopes(frameId: number): Promise<{ scopes: Array<{ name: string; presentationHint?: string; variablesReference: number }> }>;
+  /** Fetch variables in a scope reference (used by args() and retval()). */
+  variables(variablesReference: number): Promise<{ variables: Array<{ name: string; value: string; type?: string }> }>;
 }

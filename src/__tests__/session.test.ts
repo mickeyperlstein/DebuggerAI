@@ -18,6 +18,9 @@ function makeSession(): SessionManager {
     async sendExecution() { return { file: '/app/app.py', line: 2, reason: 'step' }; },
     async sendUntil(_f, l) { return { file: '/app/app.py', line: l, reason: 'step' }; },
     async sendJump(_f, l) { return { file: '/app/app.py', line: l, reason: 'goto' }; },
+    async evaluate() { return { result: '' }; },
+    async scopes()   { return { scopes: [] }; },
+    async variables(){ return { variables: [] }; },
   };
   return new SessionManager(fake);
 }

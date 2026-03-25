@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { SessionManager } from './session';
-import { SessionResult, StepResult } from './interfaces/IDebugger';
+import { SessionResult, StepResult, InspectResult } from './interfaces/IDebugger';
 import { log } from './log';
 
 export async function cmdStart(sm: SessionManager, args?: { config?: string }): Promise<SessionResult> {
@@ -70,6 +70,60 @@ export async function cmdJump(sm: SessionManager, args?: { line?: number }): Pro
   if (args?.line === undefined) return { ok: false, state: 'paused', error: 'line is required' };
   const r = await sm.jump(args.line);
   log({ cmd: 'jump', result: r });
+  return r;
+}
+
+// ── Sprint 4 — inspection ──────────────────────────────────────────────────
+
+export async function cmdPrint(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
+  if (!args?.expression) return { ok: false, error: 'print requires expression' };
+  const r = await sm.print(args.expression);
+  log({ cmd: 'print', result: r });
+  return r;
+}
+
+export async function cmdPrettyPrint(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
+  if (!args?.expression) return { ok: false, error: 'prettyPrint requires expression' };
+  const r = await sm.prettyPrint(args.expression);
+  log({ cmd: 'prettyPrint', result: r });
+  return r;
+}
+
+export async function cmdWhatis(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
+  if (!args?.expression) return { ok: false, error: 'whatis requires expression' };
+  const r = await sm.whatis(args.expression);
+  log({ cmd: 'whatis', result: r });
+  return r;
+}
+
+export async function cmdExec(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
+  if (!args?.expression) return { ok: false, error: 'exec requires expression' };
+  const r = await sm.exec(args.expression);
+  log({ cmd: 'exec', result: r });
+  return r;
+}
+
+export async function cmdDisplay(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
+  const r = await sm.display(args?.expression);
+  log({ cmd: 'display', result: r });
+  return r;
+}
+
+export async function cmdUndisplay(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
+  const r = await sm.undisplay(args?.expression);
+  log({ cmd: 'undisplay', result: r });
+  return r;
+}
+
+export async function cmdArgs(sm: SessionManager): Promise<InspectResult> {
+  const r = await sm.args();
+  log({ cmd: 'args', result: r });
+  return r;
+}
+
+export async function cmdRetval(sm: SessionManager): Promise<InspectResult> {
+  const r = await sm.retval();
+  log({ cmd: 'retval', result: r });
   return r;
 }
 

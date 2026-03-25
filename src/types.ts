@@ -24,12 +24,21 @@ export type BpResult    = Result<Breakpoint>;
 export type BpListResult = Result<Breakpoint[]>;
 
 export interface ApiRequest {
-  command: 'set' | 'edit' | 'list' | 'clear' | 'clearAll' | 'start' | 'quit' | 'restart' | 'status';
+  command:
+    // Sprint 1 — breakpoints
+    | 'set' | 'edit' | 'list' | 'clear' | 'clearAll'
+    // Sprint 2 — session lifecycle
+    | 'start' | 'quit' | 'restart' | 'status'
+    // Sprint 3 — execution control
+    | 'continue' | 'next' | 'step' | 'return' | 'until' | 'jump'
+    // Sprint 4 — inspection
+    | 'print' | 'prettyPrint' | 'whatis' | 'exec' | 'display' | 'undisplay' | 'args' | 'retval';
   id?: string;
   file?: string;
   line?: number;
   condition?: string | null;
   enabled?: boolean;
   temporary?: boolean;
-  config?: string;  // for start
+  config?: string;       // for start
+  expression?: string;   // for print / prettyPrint / whatis / exec / display / undisplay
 }

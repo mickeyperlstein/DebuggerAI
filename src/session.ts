@@ -1,19 +1,19 @@
 import * as crypto from 'crypto';
 import { ISessionAdapter, StopEvent } from './ISessionAdapter';
-import { SessionResult, SessionState, StepResult } from './interfaces/IDebugger';
+import { SessionResult, SessionState, StepResult, InspectResult } from './interfaces/IDebugger';
 import { log } from './log';
 
 /**
  * Pure session state machine.
  * No vscode imports — depends only on ISessionAdapter (injected).
- * Sprint 3 execution commands will call setPaused/setRunning/setExited
- * to keep state current.
  */
 export class SessionManager {
   private state: SessionState = 'idle';
   private sessionId: string | null = null;
   private file: string | null = null;
   private line: number | null = null;
+  private frameId: number | null = null;
+  private displayRegistry = new Set<string>();
 
   constructor(private readonly adapter: ISessionAdapter) {}
 
@@ -28,9 +28,7 @@ export class SessionManager {
       return { ok: false, state: 'idle', error: `config not found: ${configName}` };
     }
     this.sessionId = crypto.randomUUID();
-    this.file = event.file;
-    this.line = event.line;
-    this.state = 'paused';
+    this.setPaused(event.file, event.line, event.frameId);
     log({ event: 'session_start', config: configName, sessionId: this.sessionId });
     return { ok: true, state: 'paused', sessionId: this.sessionId, file: event.file, line: event.line };
   }
@@ -50,9 +48,7 @@ export class SessionManager {
       return { ok: false, state: 'idle', error: 'no session running' };
     }
     const event = await this.adapter.restartDebugging();
-    this.state = 'paused';
-    this.file = event.file;
-    this.line = event.line;
+    this.setPaused(event.file, event.line, event.frameId);
     log({ event: 'session_restart' });
     return { ok: true, state: 'paused', file: event.file, line: event.line, sessionId: this.sessionId ?? undefined };
   }
@@ -106,13 +102,95 @@ export class SessionManager {
     if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
     const result = await this.adapter.sendJump(this.file ?? '', line);
     if ('error' in result) return { ok: false, state: 'paused', error: result.error };
-    this.setPaused(result.file, result.line);
+    this.setPaused(result.file, result.line, result.frameId);
     return { ok: true, state: 'paused', file: result.file, line: result.line, reason: result.reason };
   }
 
-  // ── State hooks for Sprint 3 execution commands ───────────────────────────
+  // ── Sprint 4 — Inspection ─────────────────────────────────────────────────
 
-  setPaused(file: string, line: number): void { this.state = 'paused'; this.file = file; this.line = line; }
+  async print(expression: string): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
+    if ('error' in r) return { ok: false, error: r.error };
+    return { ok: true, valueRepr: r.result, type: r.type };
+  }
+
+  async prettyPrint(expression: string): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
+    if ('error' in r) return { ok: false, error: r.error };
+    return { ok: true, valueRepr: r.result, type: r.type };
+  }
+
+  async whatis(expression: string): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
+    if ('error' in r) return { ok: false, error: r.error };
+    return { ok: true, type: r.type, valueRepr: r.type };
+  }
+
+  async display(expression?: string): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (expression) {
+      this.displayRegistry.add(expression);
+      const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
+      if ('error' in r) return { ok: false, error: r.error };
+      return { ok: true, valueRepr: `${expression} = ${r.result}` };
+    }
+    // No expression — evaluate all registered
+    const reprs: string[] = [];
+    for (const expr of this.displayRegistry) {
+      const r = await this.adapter.evaluate(expr, this.frameId, 'repl');
+      reprs.push('error' in r ? `${expr} = <error: ${r.error}>` : `${expr} = ${r.result}`);
+    }
+    return { ok: true, valueRepr: reprs.join('\n') || '(no display expressions registered)' };
+  }
+
+  async exec(statement: string): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    const r = await this.adapter.evaluate(statement, this.frameId, 'repl');
+    if ('error' in r) return { ok: false, error: r.error };
+    return { ok: true, valueRepr: r.result };
+  }
+
+  async undisplay(expression?: string): Promise<InspectResult> {
+    if (expression) {
+      this.displayRegistry.delete(expression);
+    } else {
+      this.displayRegistry.clear();
+    }
+    return { ok: true };
+  }
+
+  async args(): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    const scopesResp = await this.adapter.scopes(this.frameId);
+    const argScope = scopesResp.scopes.find(s => s.presentationHint === 'arguments');
+    if (!argScope) return { ok: false, error: 'no arguments scope available' };
+    const varsResp = await this.adapter.variables(argScope.variablesReference);
+    const repr = varsResp.variables.map(v => `${v.name} = ${v.value}`).join(', ');
+    return { ok: true, valueRepr: repr, value: varsResp.variables };
+  }
+
+  async retval(): Promise<InspectResult> {
+    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    const scopesResp = await this.adapter.scopes(this.frameId);
+    for (const scope of scopesResp.scopes) {
+      const varsResp = await this.adapter.variables(scope.variablesReference);
+      const retVar = varsResp.variables.find(v => v.name === '(return value)');
+      if (retVar) return { ok: true, valueRepr: retVar.value, type: retVar.type };
+    }
+    return { ok: false, error: 'no return value in scope' };
+  }
+
+  // ── State hooks ───────────────────────────────────────────────────────────
+
+  setPaused(file: string, line: number, frameId?: number | null): void {
+    this.state = 'paused';
+    this.file = file;
+    this.line = line;
+    this.frameId = frameId ?? null;
+  }
   setRunning(): void { this.state = 'running'; }
   setExited(): void { this.reset(); this.state = 'exited'; }
 
@@ -121,7 +199,7 @@ export class SessionManager {
       this.setExited();
       return { ok: true, state: 'exited' };
     }
-    this.setPaused(ev.file, ev.line);
+    this.setPaused(ev.file, ev.line, ev.frameId);
     return { ok: true, state: 'paused', file: ev.file, line: ev.line, reason: ev.reason, function: ev.function };
   }
 
@@ -130,5 +208,7 @@ export class SessionManager {
     this.sessionId = null;
     this.file = null;
     this.line = null;
+    this.frameId = null;
+    this.displayRegistry.clear();
   }
 }

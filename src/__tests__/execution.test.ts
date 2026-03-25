@@ -28,6 +28,9 @@ function makeSession(overrides: {
       if (line === 999) return { ok: false, error: 'jump not allowed across function boundaries' };
       return { file: '/app/app.py', line, reason: 'goto' };
     },
+    async evaluate() { return { result: '' }; },
+    async scopes()   { return { scopes: [] }; },
+    async variables(){ return { variables: [] }; },
   };
   return new SessionManager(fake);
 }
@@ -147,6 +150,9 @@ describe('SessionManager — execution control (Sprint 3)', () => {
       async sendExecution() { callCount++; return { file: '/app/app.py', line: callCount + 1, reason: 'step' }; },
       async sendUntil(_f, l) { return { file: '/app/app.py', line: l, reason: 'step' }; },
       async sendJump(_f, l) { return { file: '/app/app.py', line: l, reason: 'goto' }; },
+      async evaluate() { return { result: '' }; },
+      async scopes()   { return { scopes: [] }; },
+      async variables(){ return { variables: [] }; },
     };
     const sm = new SessionManager(fake);
     await sm.start('Debug Backend');
