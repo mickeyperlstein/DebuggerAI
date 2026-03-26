@@ -4,7 +4,11 @@
       "Bash(npm run:*)",
       "Bash(npm test:*)",
       "Read(//Users/mickeyperlstein/Documents/perli/BE/**)",
-      "Read(//Users/mickeyperlstein/Documents/perli/FE/**)"
+      "Read(//Users/mickeyperlstein/Documents/perli/FE/**)",
+      "mcp__debuggingai__list_breakpoints",
+      "Bash(sips -z 128 128 /Users/mickeyperlstein/Documents/DebuggingAI/images/logo.png --out /Users/mickeyperlstein/Documents/DebuggingAI/images/icon.png)",
+      "Bash(code --install-extension debugging-ai-0.2.0.vsix --force)",
+      "Bash(sips -z 512 512 /Users/mickeyperlstein/Documents/DebuggingAI/images/logo.png --out /Users/mickeyperlstein/Documents/DebuggingAI/images/logo_512.png)"
     ]
   },
   "hooks": {

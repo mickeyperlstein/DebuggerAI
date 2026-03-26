@@ -20,9 +20,9 @@ DebuggingAI Extension  ← YOU ARE HERE
         ↓
 VS Code Debug API (vscode.debug.*)
         ↓
-Language Extension (Python extension, Go extension...)
+Language Extension (Python extension, Go , flutter, nodejs, rust, ruby , dart extension...)
         ↓
-Language Debugger (debugpy, dlv, node inspector...)
+Language Debugger (debugpy, dlv, node , futter, inspector...)
 ```
 
 We talk only to the VS Code Debug API layer. We are agnostic to what's below it.
@@ -74,4 +74,6 @@ All commands follow the pattern:
 - Sprint 2: Session lifecycle ✅
 - Sprint 3: Execution control (step, next, continue, until, jump) ✅
 - Sprint 4: Inspection (print, whatis, exec, display, args, retval) — 55/60 tests pass, 5 Python failing
-- Sprint 5: Add Go language target (Mickey mentioned this explicitly)
+- Sprint 5: Add flutter/dart language target (Mickey mentioned this explicitly)
+
+

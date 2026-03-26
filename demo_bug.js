@@ -1,10 +1,4 @@
-/**
- * demo_bug.js — DebuggingAI recording script (Node.js)
- *
- * Bug: baseHeaders is a shared object reference mutated inside the loop.
- * Every request config ends up with the same headers object — the last one wins.
- * Request IDs are wrong on all but the last request.
- */
+
 function buildRequests(endpoints) {
   const baseHeaders = { 'Content-Type': 'application/json' };
   const configs = [];
@@ -12,7 +6,7 @@ function buildRequests(endpoints) {
   for (let i = 0; i < endpoints.length; i++) {
     const config = {
       url: endpoints[i],
-      headers: baseHeaders,            // bug: shared reference, not a copy
+      headers: baseHeaders,         
     };
     config.headers['X-Request-Id'] = `req-${i + 1}`;
     configs.push(config);

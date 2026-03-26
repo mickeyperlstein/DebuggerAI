@@ -26,3 +26,5 @@ jest.config.*
 features/**
 test_app.*
 *.vsix
+images/logo.png
+images/logo_512.png
