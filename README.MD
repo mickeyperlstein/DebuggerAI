@@ -6,7 +6,7 @@
 
 DebuggingAI is a VS Code extension that exposes debugger control as a tool interface — so any AI agent (Claude Code, Cline, Cursor, Copilot Workspace, local LLMs) can set breakpoints, inspect state, and drive a debug session without knowing VS Code internals.
 
-## Positioning
+## Positioningicon to readme
 
 Most AI coding agents can read and write files. None can control the debugger.
 DebuggingAI bridges that gap — agent-agnostic, runtime-agnostic, built on VS Code's native debug API and the Debug Adapter Protocol.
