@@ -34,6 +34,9 @@ import {
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { version: VERSION } = require('../../../package.json') as { version: string };
+
 const PORT = Number(process.env.DEBUGAI_PORT ?? 7890);
 const HOST = process.env.DEBUGAI_HOST ?? '127.0.0.1';
 
@@ -66,7 +69,7 @@ const TOOLS: Tool[] = [
   // ── Breakpoints ────────────────────────────────────────────────────────────
   {
     name: 'set_breakpoint',
-    description: 'Set a breakpoint at a specific file and line. Optionally add a condition.',
+    description: 'Set a breakpoint at a specific file and line. Can be called before or during a session — breakpoints persist and activate automatically when a session starts. Optionally add a condition.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -79,12 +82,12 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'list_breakpoints',
-    description: 'List all currently set breakpoints.',
+    description: 'List all currently set breakpoints, including those set before any session started.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'clear_breakpoint',
-    description: 'Remove a breakpoint by its ID.',
+    description: 'Remove a breakpoint by its ID. Works whether or not a session is active.',
     inputSchema: {
       type: 'object',
       properties: { id: { type: 'string', description: 'Breakpoint ID from list_breakpoints' } },
@@ -93,13 +96,13 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'clear_all_breakpoints',
-    description: 'Remove all breakpoints.',
+    description: 'Remove all breakpoints. Works whether or not a session is active.',
     inputSchema: { type: 'object', properties: {} },
   },
   // ── Session ────────────────────────────────────────────────────────────────
   {
     name: 'start_session',
-    description: 'Start a debug session using a named launch.json configuration.',
+    description: 'Start a debug session for runtime control (continue, step, inspect). Pre-set breakpoints and watches activate automatically.',
     inputSchema: {
       type: 'object',
       properties: { config: { type: 'string', description: 'Name of the launch.json debug configuration' } },
@@ -118,7 +121,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'session_status',
-    description: 'Get the current debug session status (idle, running, paused).',
+    description: 'Get the current debug session status. States: idle (no session), running (executing), paused (at breakpoint or step), exited (session ended).',
     inputSchema: { type: 'object', properties: {} },
   },
   // ── Execution ──────────────────────────────────────────────────────────────
@@ -190,7 +193,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'watch',
-    description: 'Register an expression to watch (display on every stop).',
+    description: 'Register an expression to watch (displayed on every stop). Can be set before or during a session — watches activate automatically when a session starts.',
     inputSchema: {
       type: 'object',
       properties: { expression: { type: 'string', description: 'Expression to watch' } },
@@ -199,7 +202,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'unwatch',
-    description: 'Remove a watched expression. Omit expression to clear all watches.',
+    description: 'Remove a watched expression. Works whether or not a session is active. Omit expression to clear all watches.',
     inputSchema: {
       type: 'object',
       properties: { expression: { type: 'string', description: 'Expression to remove (omit to clear all)' } },
@@ -249,7 +252,11 @@ async function dispatch(name: string, args: Record<string, unknown>): Promise<un
 // ── MCP server ───────────────────────────────────────────────────────────────
 
 const server = new Server(
-  { name: 'debuggingai', version: '0.1.0' },
+  {
+    name: 'debuggingai',
+    version: VERSION,
+    description: 'Breakpoint and watch tools work independently of session state — call them any time. Session tools (start, stop, restart, continue, step, etc.) require an active session.',
+  },
   { capabilities: { tools: {} } },
 );
 
