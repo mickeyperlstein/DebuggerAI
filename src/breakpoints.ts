@@ -14,7 +14,7 @@ export class BreakpointManager {
   constructor(private readonly adapter: IDebugAdapter) {}
 
   set(file: string, line: number, condition: string | null = null, temporary = false): BpResult {
-    if (line < 1) return { ok: false, error: `line must be ≥ 1, got ${line}` };
+    if (line < 1) return { error: `line must be ≥ 1, got ${line}`, ok: false };
 
     const bp: Breakpoint = {
       id: crypto.randomUUID(),
@@ -27,36 +27,36 @@ export class BreakpointManager {
 
     this.store.set(bp.id, bp);
     this.adapter.addBreakpoint(file, line, bp.condition ?? undefined, true);
-    return { ok: true, data: bp };
+    return { data: bp, ok: true };
   }
 
   edit(id: string, patch: Partial<Pick<Breakpoint, 'condition' | 'enabled' | 'line'>>): BpResult {
     const bp = this.store.get(id);
-    if (!bp) return { ok: false, error: `no breakpoint: ${id}` };
+    if (!bp) return { error: `no breakpoint: ${id}`, ok: false };
 
     this.adapter.removeBreakpoint(bp.file, bp.line);
     const updated = { ...bp, ...patch };
     this.adapter.addBreakpoint(updated.file, updated.line, updated.condition ?? undefined, updated.enabled);
     this.store.set(id, updated);
-    return { ok: true, data: updated };
+    return { data: updated, ok: true };
   }
 
   clear(id: string): BpResult {
     const bp = this.store.get(id);
-    if (!bp) return { ok: false, error: `no breakpoint: ${id}` };
+    if (!bp) return { error: `no breakpoint: ${id}`, ok: false };
     this.adapter.removeBreakpoint(bp.file, bp.line);
     this.store.delete(id);
-    return { ok: true, data: bp };
+    return { data: bp, ok: true };
   }
 
   clearAll(): BpListResult {
     this.store.forEach(bp => this.adapter.removeBreakpoint(bp.file, bp.line));
     this.store.clear();
-    return { ok: true, data: [] };
+    return { data: [], ok: true };
   }
 
   list(): BpListResult {
-    return { ok: true, data: [...this.store.values()] };
+    return { data: [...this.store.values()], ok: true };
   }
 
   /** Called by the vscode.debug.onDidChangeBreakpoints listener — keeps store
@@ -82,9 +82,9 @@ export class BreakpointManager {
 
   ignore(id: string, count: number): BpResult {
     const bp = this.store.get(id);
-    if (!bp) return { ok: false, error: `no breakpoint: ${id}` };
+    if (!bp) return { error: `no breakpoint: ${id}`, ok: false };
     const updated = { ...bp, ignoreCount: count };
     this.store.set(id, updated);
-    return { ok: true, data: updated };
+    return { data: updated, ok: true };
   }
 }

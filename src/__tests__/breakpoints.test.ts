@@ -15,7 +15,7 @@ describe('BreakpointManager', () => {
 
   test('set returns a breakpoint with defaults', () => {
     const r = mgr.set('/app/app.py', 42);
-    expect(r).toMatchObject({ ok: true, data: { file: '/app/app.py', line: 42, condition: null, enabled: true, temporary: false } });
+    expect(r).toMatchObject({ data: { file: '/app/app.py', line: 42, condition: null, enabled: true, temporary: false }, ok: true });
     expect(typeof r.data?.id).toBe('string');
   });
 
@@ -34,7 +34,7 @@ describe('BreakpointManager', () => {
   // ── list ───────────────────────────────────────────────────────────────────
 
   test('list is empty initially', () => {
-    expect(mgr.list()).toMatchObject({ ok: true, data: [] });
+    expect(mgr.list()).toMatchObject({ data: [], ok: true });
   });
 
   test('list returns all breakpoints', () => {

@@ -1,0 +1,15 @@
+node_modules/
+src/
+bin/
+clients/
+docs/
+images/
+fixtures/
+test_app.*
+.vscode/
+.vscode-test/
+.claude/
+*.vsix
+*.md
+!README.md
+.git/

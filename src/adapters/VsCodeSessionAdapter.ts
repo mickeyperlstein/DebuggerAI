@@ -140,7 +140,7 @@ export class VsCodeSessionAdapter implements ISessionAdapter {
 
   async sendJump(file: string, line: number): Promise<StopEvent | { ok: false; error: string }> {
     const session = vscode.debug.activeDebugSession;
-    if (!session) return { ok: false, error: 'no active debug session' };
+    if (!session) return { error: 'no active debug session', ok: false };
     try {
       const targetsResp = await session.customRequest('gotoTargets', {
         source: { path: file },
@@ -148,7 +148,7 @@ export class VsCodeSessionAdapter implements ISessionAdapter {
       });
       const targets: any[] = targetsResp?.targets ?? [];
       if (!targets.length) {
-        return { ok: false, error: 'jump not allowed: no valid goto targets at this line' };
+        return { error: 'jump not allowed: no valid goto targets at this line', ok: false };
       }
       await session.customRequest('goto', { threadId: 1, targetId: targets[0].id });
       // goto does not emit a stopped event — fetch position directly.
@@ -162,7 +162,7 @@ export class VsCodeSessionAdapter implements ISessionAdapter {
         frameId:  frame?.id,
       };
     } catch (e: any) {
-      return { ok: false, error: `jump failed: ${e?.message ?? 'unknown error'}` };
+      return { error: `jump failed: ${e?.message ?? 'unknown error'}`, ok: false };
     }
   }
 

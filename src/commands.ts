@@ -35,11 +35,11 @@ export async function cmdSet(
 
   const file = args?.file ?? editor?.document.uri.fsPath
     ?? await prompt('File path', '/path/to/file');
-  if (!file) return { ok: false, error: 'cancelled' };
+  if (!file) return { error: 'cancelled', ok: false };
 
   const line = args?.line ?? (editor ? editor.selection.active.line + 1 : undefined)
     ?? Number(await prompt(`Line in ${file}`, '42', v => Number.isInteger(+v) && +v > 0 ? null : 'positive integer'));
-  if (!line) return { ok: false, error: 'cancelled' };
+  if (!line) return { error: 'cancelled', ok: false };
 
   const condition = args?.condition !== undefined ? args.condition
     : await vscode.window.showInputBox({ prompt: 'Condition (optional)', placeHolder: 'x > 100' })
@@ -58,10 +58,10 @@ export async function cmdEdit(
   args?: { id?: string; condition?: string | null; enabled?: boolean; line?: number },
 ): Promise<BpResult> {
   const { data: bps = [] } = mgr.list();
-  if (!bps.length) return { ok: false, error: 'no breakpoints' };
+  if (!bps.length) return { error: 'no breakpoints', ok: false };
 
   const id = args?.id ?? await pickBreakpoint(bps);
-  if (!id) return { ok: false, error: 'cancelled' };
+  if (!id) return { error: 'cancelled', ok: false };
 
   const patch: Parameters<typeof mgr.edit>[1] = {};
   const hasExplicitFields = args?.enabled !== undefined || args?.line !== undefined;
@@ -95,7 +95,7 @@ export function cmdList(mgr: BreakpointManager): BpListResult {
 export async function cmdClear(mgr: BreakpointManager, args?: { id?: string }): Promise<BpResult> {
   const { data: bps = [] } = mgr.list();
   const id = args?.id ?? await pickBreakpoint(bps);
-  if (!id) return { ok: false, error: 'cancelled' };
+  if (!id) return { error: 'cancelled', ok: false };
 
   const r = mgr.clear(id);
   log({ cmd: 'clear', result: r });

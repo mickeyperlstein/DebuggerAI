@@ -22,6 +22,7 @@ export class Server {
     private readonly sm: SessionManager,
     private readonly port: number,
     registry?: ClientRegistry,
+    private readonly host: string = '127.0.0.1',
   ) {
     this.srv = http.createServer((req, res) => this.handle(req, res));
 
@@ -38,23 +39,23 @@ export class Server {
   }
 
   start = () => new Promise<void>((ok, fail) => {
-    this.srv.listen(this.port, '127.0.0.1', () => { log({ event: 'server_start', port: this.port }); ok(); });
+    this.srv.listen(this.port, this.host, () => { log({ event: 'server_start', port: this.port, host: this.host }); ok(); });
     this.srv.on('error', fail);
   });
 
   stop = () => new Promise<void>(ok => this.srv.close(() => ok()));
 
   private handle(req: http.IncomingMessage, res: http.ServerResponse) {
-    if (req.method !== 'POST') { this.reply(res, 405, { ok: false, error: 'POST only' }); return; }
+    if (req.method !== 'POST') { this.reply(res, 405, { error: 'POST only', ok: false }); return; }
     let body = '';
     req.on('data', c => (body += c));
     req.on('end', () => {
       try {
         Promise.resolve(this.dispatch(JSON.parse(body) as ApiRequest))
           .then(r => this.reply(res, 200, r))
-          .catch(() => this.reply(res, 500, { ok: false, error: 'internal error' }));
+          .catch(() => this.reply(res, 500, { error: 'internal error', ok: false }));
       } catch {
-        this.reply(res, 400, { ok: false, error: 'invalid JSON' });
+        this.reply(res, 400, { error: 'invalid JSON', ok: false });
       }
     });
   }
@@ -63,15 +64,15 @@ export class Server {
     const { mgr, sm } = this;
     const handlers: Record<ApiRequest['command'], () => Response | Promise<Response>> = {
       // Sprint 1 — breakpoints
-      set:      () => !r.file || !r.line ? { ok: false, error: 'set requires file + line' }
+      set:      () => !r.file || !r.line ? { error: 'set requires file + line', ok: false }
                                          : mgr.set(r.file, r.line, r.condition ?? null, r.temporary),
-      edit:     () => !r.id ? { ok: false, error: 'edit requires id' }
+      edit:     () => !r.id ? { error: 'edit requires id', ok: false }
                             : mgr.edit(r.id, { condition: r.condition, enabled: r.enabled, line: r.line }),
-      clear:    () => !r.id ? { ok: false, error: 'clear requires id' } : mgr.clear(r.id),
+      clear:    () => !r.id ? { error: 'clear requires id', ok: false } : mgr.clear(r.id),
       clearAll: () => mgr.clearAll(),
       list:     () => mgr.list(),
       // Sprint 2 — session lifecycle
-      start:    () => !r.config ? { ok: false, state: 'idle', error: 'start requires config' } : sm.start(r.config),
+      start:    () => !r.config ? { state: 'idle', error: 'start requires config', ok: false } : sm.start(r.config),
       quit:     () => sm.quit(),
       restart:  () => sm.restart(),
       status:   () => sm.status(),
@@ -81,18 +82,18 @@ export class Server {
       step:     () => sm.step(),
       return:   () => sm.return(),
       until:    () => sm.until(r.line),
-      jump:     () => r.line === undefined ? { ok: false, state: 'paused', error: 'jump requires line' } : sm.jump(r.line),
+      jump:     () => r.line === undefined ? { state: 'paused', error: 'jump requires line', ok: false } : sm.jump(r.line),
       // Sprint 4 — inspection
-      print:       () => !r.expression ? { ok: false, error: 'print requires expression' }       : sm.print(r.expression),
-      prettyPrint: () => !r.expression ? { ok: false, error: 'prettyPrint requires expression' } : sm.prettyPrint(r.expression),
-      whatis:      () => !r.expression ? { ok: false, error: 'whatis requires expression' }      : sm.whatis(r.expression),
-      exec:        () => !r.expression ? { ok: false, error: 'exec requires expression' }        : sm.exec(r.expression),
+      print:       () => !r.expression ? { error: 'print requires expression', ok: false }       : sm.print(r.expression),
+      prettyPrint: () => !r.expression ? { error: 'prettyPrint requires expression', ok: false } : sm.prettyPrint(r.expression),
+      whatis:      () => !r.expression ? { error: 'whatis requires expression', ok: false }      : sm.whatis(r.expression),
+      exec:        () => !r.expression ? { error: 'exec requires expression', ok: false }        : sm.exec(r.expression),
       display:     () => sm.display(r.expression),
       undisplay:   () => sm.undisplay(r.expression),
       args:        () => sm.args(),
       retval:      () => sm.retval(),
     };
-    return (handlers[r.command] ?? (() => ({ ok: false, error: `unknown: ${r.command}` })))();
+    return (handlers[r.command] ?? (() => ({ error: `unknown: ${r.command}`, ok: false })))();
   }
 
   private reply(res: http.ServerResponse, status: number, body: Response) {

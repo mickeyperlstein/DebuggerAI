@@ -24,11 +24,21 @@ import { ClientRegistry }    from '../src/server/ClientRegistry';
 import { Server }            from '../src/server';
 
 const port     = Number(process.env.DEBUGAI_PORT ?? 7890);
+const host     = process.env.DEBUGAI_HOST ?? '0.0.0.0';
 const registry = new ClientRegistry();
 const adapter  = new ClientAdapter(registry);
 const mgr      = new BreakpointManager(adapter);
 const sm       = new SessionManager(adapter);
-const server   = new Server(mgr, sm, port, registry);
+const server   = new Server(mgr, sm, port, registry, host);
+
+// Keep SessionManager in sync when the human steps manually in VS Code.
+adapter.onStopEvent(ev => {
+  if (ev.reason === 'exited') {
+    sm.setExited();
+  } else {
+    sm.setPaused(ev.file, ev.line, ev.frameId);
+  }
+});
 
 server.start().then(() => {
   process.stdout.write(`DebuggingAI server listening on port ${port}\n`);

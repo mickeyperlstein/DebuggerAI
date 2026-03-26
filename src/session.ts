@@ -19,78 +19,78 @@ export class SessionManager {
 
   async start(configName: string): Promise<SessionResult> {
     if (this.state !== 'idle' && this.state !== 'exited') {
-      return { ok: false, state: this.state, error: 'session already running' };
+      return { state: this.state, error: 'session already running', ok: false };
     }
     this.state = 'starting';
     const event = await this.adapter.startDebugging(configName);
     if (!event) {
       this.state = 'idle';
-      return { ok: false, state: 'idle', error: `config not found: ${configName}` };
+      return { state: 'idle', error: `config not found: ${configName}`, ok: false };
     }
     this.sessionId = crypto.randomUUID();
     this.setPaused(event.file, event.line, event.frameId);
     log({ event: 'session_start', config: configName, sessionId: this.sessionId });
-    return { ok: true, state: 'paused', sessionId: this.sessionId, file: event.file, line: event.line };
+    return { state: 'paused', sessionId: this.sessionId, file: event.file, line: event.line, ok: true };
   }
 
   async quit(): Promise<SessionResult> {
     if (this.state === 'idle' || this.state === 'exited') {
-      return { ok: true, state: 'idle' };
+      return { state: 'idle', ok: true };
     }
     await this.adapter.stopDebugging();
     this.reset();
     log({ event: 'session_quit' });
-    return { ok: true, state: 'idle' };
+    return { state: 'idle', ok: true };
   }
 
   async restart(_args?: string): Promise<SessionResult> {
     if (this.state === 'idle' || this.state === 'exited') {
-      return { ok: false, state: 'idle', error: 'no session running' };
+      return { state: 'idle', error: 'no session running', ok: false };
     }
     const event = await this.adapter.restartDebugging();
     this.setPaused(event.file, event.line, event.frameId);
     log({ event: 'session_restart' });
-    return { ok: true, state: 'paused', file: event.file, line: event.line, sessionId: this.sessionId ?? undefined };
+    return { state: 'paused', file: event.file, line: event.line, sessionId: this.sessionId ?? undefined, ok: true };
   }
 
   async status(): Promise<SessionResult> {
     return {
-      ok: true,
       state: this.state,
       file: this.file ?? undefined,
       line: this.line ?? undefined,
       sessionId: this.sessionId ?? undefined,
+      ok: true,
     };
   }
 
   // ── Sprint 3 — Execution control ─────────────────────────────────────────
 
   async continue(): Promise<StepResult> {
-    if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
+    if (this.state !== 'paused') return { state: this.state, error: 'not paused', ok: false };
     this.setRunning();
     return this.applyStop(await this.adapter.sendExecution('continue'));
   }
 
   async next(): Promise<StepResult> {
-    if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
+    if (this.state !== 'paused') return { state: this.state, error: 'not paused', ok: false };
     this.setRunning();
     return this.applyStop(await this.adapter.sendExecution('next'));
   }
 
   async step(): Promise<StepResult> {
-    if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
+    if (this.state !== 'paused') return { state: this.state, error: 'not paused', ok: false };
     this.setRunning();
     return this.applyStop(await this.adapter.sendExecution('stepIn'));
   }
 
   async return(): Promise<StepResult> {
-    if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
+    if (this.state !== 'paused') return { state: this.state, error: 'not paused', ok: false };
     this.setRunning();
     return this.applyStop(await this.adapter.sendExecution('stepOut'));
   }
 
   async until(line?: number): Promise<StepResult> {
-    if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
+    if (this.state !== 'paused') return { state: this.state, error: 'not paused', ok: false };
     this.setRunning();
     const ev = line !== undefined
       ? await this.adapter.sendUntil(this.file ?? '', line)
@@ -99,43 +99,43 @@ export class SessionManager {
   }
 
   async jump(line: number): Promise<StepResult> {
-    if (this.state !== 'paused') return { ok: false, state: this.state, error: 'not paused' };
+    if (this.state !== 'paused') return { state: this.state, error: 'not paused', ok: false };
     const result = await this.adapter.sendJump(this.file ?? '', line);
-    if ('error' in result) return { ok: false, state: 'paused', error: result.error };
+    if ('error' in result) return { state: 'paused', error: result.error, ok: false };
     this.setPaused(result.file, result.line, result.frameId);
-    return { ok: true, state: 'paused', file: result.file, line: result.line, reason: result.reason };
+    return { state: 'paused', file: result.file, line: result.line, reason: result.reason, ok: true };
   }
 
   // ── Sprint 4 — Inspection ─────────────────────────────────────────────────
 
   async print(expression: string): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
-    if ('error' in r) return { ok: false, error: r.error };
-    return { ok: true, valueRepr: r.result, type: r.type };
+    if ('error' in r) return { error: r.error, ok: false };
+    return { valueRepr: r.result, type: r.type, ok: true };
   }
 
   async prettyPrint(expression: string): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
-    if ('error' in r) return { ok: false, error: r.error };
-    return { ok: true, valueRepr: r.result, type: r.type };
+    if ('error' in r) return { error: r.error, ok: false };
+    return { valueRepr: r.result, type: r.type, ok: true };
   }
 
   async whatis(expression: string): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
-    if ('error' in r) return { ok: false, error: r.error };
-    return { ok: true, type: r.type, valueRepr: r.type };
+    if ('error' in r) return { error: r.error, ok: false };
+    return { type: r.type, valueRepr: r.type, ok: true };
   }
 
   async display(expression?: string): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     if (expression) {
       this.displayRegistry.add(expression);
       const r = await this.adapter.evaluate(expression, this.frameId, 'repl');
-      if ('error' in r) return { ok: false, error: r.error };
-      return { ok: true, valueRepr: `${expression} = ${r.result}` };
+      if ('error' in r) return { error: r.error, ok: false };
+      return { valueRepr: `${expression} = ${r.result}`, ok: true };
     }
     // No expression — evaluate all registered
     const reprs: string[] = [];
@@ -143,14 +143,14 @@ export class SessionManager {
       const r = await this.adapter.evaluate(expr, this.frameId, 'repl');
       reprs.push('error' in r ? `${expr} = <error: ${r.error}>` : `${expr} = ${r.result}`);
     }
-    return { ok: true, valueRepr: reprs.join('\n') || '(no display expressions registered)' };
+    return { valueRepr: reprs.join('\n') || '(no display expressions registered)', ok: true };
   }
 
   async exec(statement: string): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     const r = await this.adapter.evaluate(statement, this.frameId, 'repl');
-    if ('error' in r) return { ok: false, error: r.error };
-    return { ok: true, valueRepr: r.result };
+    if ('error' in r) return { error: r.error, ok: false };
+    return { valueRepr: r.result, ok: true };
   }
 
   async undisplay(expression?: string): Promise<InspectResult> {
@@ -163,24 +163,24 @@ export class SessionManager {
   }
 
   async args(): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     const scopesResp = await this.adapter.scopes(this.frameId);
     const argScope = scopesResp.scopes.find(s => s.presentationHint === 'arguments');
-    if (!argScope) return { ok: false, error: 'no arguments scope available' };
+    if (!argScope) return { error: 'no arguments scope available', ok: false };
     const varsResp = await this.adapter.variables(argScope.variablesReference);
     const repr = varsResp.variables.map(v => `${v.name} = ${v.value}`).join(', ');
-    return { ok: true, valueRepr: repr, value: varsResp.variables };
+    return { valueRepr: repr, value: varsResp.variables, ok: true };
   }
 
   async retval(): Promise<InspectResult> {
-    if (this.state !== 'paused' || this.frameId === null) return { ok: false, error: 'not paused' };
+    if (this.state !== 'paused' || this.frameId === null) return { error: 'not paused', ok: false };
     const scopesResp = await this.adapter.scopes(this.frameId);
     for (const scope of scopesResp.scopes) {
       const varsResp = await this.adapter.variables(scope.variablesReference);
       const retVar = varsResp.variables.find(v => v.name === '(return value)');
-      if (retVar) return { ok: true, valueRepr: retVar.value, type: retVar.type };
+      if (retVar) return { valueRepr: retVar.value, type: retVar.type, ok: true };
     }
-    return { ok: false, error: 'no return value in scope' };
+    return { error: 'no return value in scope', ok: false };
   }
 
   // ── State hooks ───────────────────────────────────────────────────────────
@@ -197,10 +197,10 @@ export class SessionManager {
   private applyStop(ev: StopEvent | null): StepResult {
     if (!ev || ev.reason === 'exited') {
       this.setExited();
-      return { ok: true, state: 'exited' };
+      return { state: 'exited', ok: true };
     }
     this.setPaused(ev.file, ev.line, ev.frameId);
-    return { ok: true, state: 'paused', file: ev.file, line: ev.line, reason: ev.reason, function: ev.function };
+    return { state: 'paused', file: ev.file, line: ev.line, reason: ev.reason, function: ev.function, ok: true };
   }
 
   private reset(): void {

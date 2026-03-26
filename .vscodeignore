@@ -4,6 +4,8 @@
 src/**
 bin/**
 node_modules/**
+!node_modules/ws/**
+!node_modules/ws
 out/test/**
 out/e2e/**
 out/__tests__/**

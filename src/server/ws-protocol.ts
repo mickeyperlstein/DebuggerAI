@@ -43,17 +43,17 @@ export type WsCommand =
 export interface WsOkResponse {
   kind: 'response';
   requestId: string;
-  ok: true;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
+  ok: true;
 }
 
 /** Error response to a WsCommand. */
 export interface WsErrResponse {
   kind: 'response';
   requestId: string;
-  ok: false;
   error: string;
+  ok: false;
 }
 
 export type WsResponse = WsOkResponse | WsErrResponse;

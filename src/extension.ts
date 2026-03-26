@@ -78,7 +78,8 @@ export function activate(ctx: vscode.ExtensionContext): void {
   client = new VsCodeExtensionClient(ctx, port);
   client.connect();
 
-  log({ event: 'activated', name: 'debugai', port, version: '0.1.0' });
+  const { version } = ctx.extension.packageJSON as { version: string };
+  log({ event: 'activated', name: 'debugai', port, version });
 }
 
 export function deactivate(): void {

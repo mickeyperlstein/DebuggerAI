@@ -35,7 +35,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 const PORT = Number(process.env.DEBUGAI_PORT ?? 7890);
-const HOST = '127.0.0.1';
+const HOST = process.env.DEBUGAI_HOST ?? '127.0.0.1';
 
 // ── HTTP helper ──────────────────────────────────────────────────────────────
 
@@ -263,4 +263,7 @@ server.setRequestHandler(CallToolRequestSchema, async req => {
 });
 
 const transport = new StdioServerTransport();
-await server.connect(transport);
+server.connect(transport).catch((err: Error) => {
+  process.stderr.write(`MCP server error: ${err.message}\n`);
+  process.exit(1);
+});

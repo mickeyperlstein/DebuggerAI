@@ -21,7 +21,21 @@ import {
 const RPC_TIMEOUT_MS = 30_000;
 
 export class ClientAdapter implements ISessionAdapter, IDebugAdapter {
-  constructor(private readonly registry: ClientRegistry) {}
+  private stopEventCb: ((ev: StopEvent) => void) | null = null;
+
+  constructor(private readonly registry: ClientRegistry) {
+    // Persistent listener for unsolicited stopped/exited events pushed by the
+    // extension when the human steps manually in VS Code.
+    this.registry.onMessage((msg: WsClientMessage) => {
+      if (msg.kind !== 'event' || !this.stopEventCb) return;
+      this.stopEventCb((msg as WsStoppedEvent).payload);
+    });
+  }
+
+  /** Called by the server to keep SessionManager in sync with manual VS Code steps. */
+  onStopEvent(cb: (ev: StopEvent) => void): void {
+    this.stopEventCb = cb;
+  }
 
   // ── ISessionAdapter ────────────────────────────────────────────────────────
 

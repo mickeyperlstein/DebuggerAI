@@ -24,7 +24,7 @@ import {
   WsStoppedEvent, WsRegister,
 } from '../server/ws-protocol';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 export class VsCodeExtensionClient {
   private readonly ws:             WsReconnector;
@@ -34,7 +34,7 @@ export class VsCodeExtensionClient {
 
   constructor(
     private readonly ctx:  vscode.ExtensionContext,
-    private readonly port: number,
+    port: number,
   ) {
     this.proxy          = new VsCodeDapProxy(ctx);
     this.sessionAdapter = new VsCodeSessionAdapter(this.proxy);
@@ -87,11 +87,11 @@ export class VsCodeExtensionClient {
     const { requestId } = cmd;
     try {
       const payload = await this.execute(cmd);
-      this.send<WsOkResponse>({ kind: 'response', requestId, ok: true, payload });
+      this.send<WsOkResponse>({ kind: 'response', requestId, payload, ok: true });
     } catch (e: any) {
       this.send<WsErrResponse>({
-        kind: 'response', requestId, ok: false,
-        error: e?.message ?? 'unknown error',
+        kind: 'response', requestId,
+        error: e?.message ?? 'unknown error', ok: false,
       });
     }
   }

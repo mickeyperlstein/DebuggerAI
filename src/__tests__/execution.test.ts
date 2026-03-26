@@ -25,7 +25,7 @@ function makeSession(overrides: {
     async sendUntil(_file, line) { return { file: '/app/app.py', line, reason: 'step' }; },
     async sendJump(_file, line) {
       if (overrides.jumpResult !== undefined) return overrides.jumpResult;
-      if (line === 999) return { ok: false, error: 'jump not allowed across function boundaries' };
+      if (line === 999) return { error: 'jump not allowed across function boundaries', ok: false };
       return { file: '/app/app.py', line, reason: 'goto' };
     },
     async evaluate() { return { result: '' }; },

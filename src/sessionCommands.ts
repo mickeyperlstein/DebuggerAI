@@ -5,7 +5,7 @@ import { log } from './log';
 
 export async function cmdStart(sm: SessionManager, args?: { config?: string }): Promise<SessionResult> {
   const configName = args?.config ?? await pickLaunchConfig();
-  if (!configName) return { ok: false, state: 'idle', error: 'cancelled' };
+  if (!configName) return { state: 'idle', error: 'cancelled', ok: false };
   const r = await sm.start(configName);
   log({ cmd: 'start', result: r });
   if (!r.ok) vscode.window.showErrorMessage(`DebuggingAI: ${r.error}`);
@@ -67,7 +67,7 @@ export async function cmdUntil(sm: SessionManager, args?: { line?: number }): Pr
 }
 
 export async function cmdJump(sm: SessionManager, args?: { line?: number }): Promise<StepResult> {
-  if (args?.line === undefined) return { ok: false, state: 'paused', error: 'line is required' };
+  if (args?.line === undefined) return { state: 'paused', error: 'line is required', ok: false };
   const r = await sm.jump(args.line);
   log({ cmd: 'jump', result: r });
   return r;
@@ -76,28 +76,28 @@ export async function cmdJump(sm: SessionManager, args?: { line?: number }): Pro
 // ── Sprint 4 — inspection ──────────────────────────────────────────────────
 
 export async function cmdPrint(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
-  if (!args?.expression) return { ok: false, error: 'print requires expression' };
+  if (!args?.expression) return { error: 'print requires expression', ok: false };
   const r = await sm.print(args.expression);
   log({ cmd: 'print', result: r });
   return r;
 }
 
 export async function cmdPrettyPrint(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
-  if (!args?.expression) return { ok: false, error: 'prettyPrint requires expression' };
+  if (!args?.expression) return { error: 'prettyPrint requires expression', ok: false };
   const r = await sm.prettyPrint(args.expression);
   log({ cmd: 'prettyPrint', result: r });
   return r;
 }
 
 export async function cmdWhatis(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
-  if (!args?.expression) return { ok: false, error: 'whatis requires expression' };
+  if (!args?.expression) return { error: 'whatis requires expression', ok: false };
   const r = await sm.whatis(args.expression);
   log({ cmd: 'whatis', result: r });
   return r;
 }
 
 export async function cmdExec(sm: SessionManager, args?: { expression?: string }): Promise<InspectResult> {
-  if (!args?.expression) return { ok: false, error: 'exec requires expression' };
+  if (!args?.expression) return { error: 'exec requires expression', ok: false };
   const r = await sm.exec(args.expression);
   log({ cmd: 'exec', result: r });
   return r;

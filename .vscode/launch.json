@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+    
 
     // ── 0. Run integration tests (shows results in VS Code Test Explorer) ────
     {
@@ -58,7 +59,27 @@
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
     },
 
-    // ── 4. Debug test_app.py — the fake Python script ────────────────────────
+    // ── 4. Debug demo_bug.py — the recording demo (Python) ───────────────────
+    {
+      "name": "Debug demo_bug.py",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demo_bug.py",
+      "console": "integratedTerminal",
+      "stopOnEntry": true
+    },
+
+    // ── 4b. Debug demo_bug.js — the recording demo (Node.js) ─────────────────
+    {
+      "name": "Debug demo_bug.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/demo_bug.js",
+      "console": "integratedTerminal",
+      "stopOnEntry": true
+    },
+
+    // ── Debug test_app.py — the fake Python script ────────────────────────
     // Requires the Python VS Code extension + debugpy installed (pip install debugpy).
     // Set breakpoints via "DebuggingAI: Set Breakpoint" then launch this config.
     // This is how you prove the extension actually places breakpoints correctly.

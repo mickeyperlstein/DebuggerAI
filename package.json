@@ -2,7 +2,7 @@
   "name": "debugging-ai",
   "displayName": "DebuggingAI",
   "description": "Universal debugger control for any AI agent — Claude, Cline, Cursor, and more",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "mickeyperlstein",
   "license": "MIT",
   "icon": "images/icon.png",
@@ -141,7 +141,7 @@
     }
   },
   "scripts": {
-    "compile": "tsc -p ./",
+    "compile": "tsc -p tsconfig.json && tsc -p tsconfig.server.json",
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts",
     "test": "jest --runInBand",
@@ -196,5 +196,6 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0",
     "ws": "^8.20.0"
-  }
+  },
+  "bundledDependencies": ["ws"]
 }
