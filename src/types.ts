@@ -23,6 +23,25 @@ export interface Result<T> {
 export type BpResult    = Result<Breakpoint>;
 export type BpListResult = Result<Breakpoint[]>;
 
+/**
+ * BusMessage — canonical envelope for every event on the shared debug session bus.
+ * Schema: { seq, ts, source, topic, sessionId, payload }
+ */
+export interface BusMessage {
+  /** Monotonic integer — ordering + replay index. */
+  seq: number;
+  /** Unix milliseconds — wall clock for video sync. */
+  ts: number;
+  /** Client id who published (e.g. "vscode", "claude", "aidbg"). */
+  source: string;
+  /** Topic string (e.g. "dap.stopped", "command", "session.abc123"). */
+  topic: string;
+  /** Session identifier. Use "*" for wildcard (receives all sessions). */
+  sessionId: string;
+  /** Raw message body. */
+  payload: unknown;
+}
+
 export interface ApiRequest {
   command:
     // Sprint 1 — breakpoints
