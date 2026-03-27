@@ -1,10 +1,10 @@
 /**
  * Sprint 4 — Inspection (unit tests)
- * Tests SessionManager inspection methods via a fake ISessionAdapter.
+ * Tests DebugStateMachine inspection methods via a fake ISessionAdapter.
  * Semantic correctness against a real debug session is covered by sprint4.test.ts (e2e).
  */
 
-import { SessionManager } from '../session';
+import { DebugStateMachine } from '../session';
 import { ISessionAdapter, StopEvent, EvalResult, ExecCmd } from '../ISessionAdapter';
 
 const ENTRY: StopEvent = { file: '/app/app.js', line: 14, reason: 'entry', frameId: 1 };
@@ -15,7 +15,7 @@ function makeSession(overrides: {
   evalResponse?: EvalFn;
   scopesResult?: { scopes: any[] };
   varsResult?: (varRef: number) => { variables: any[] };
-} = {}): SessionManager {
+} = {}): DebugStateMachine {
   const defaultEval: EvalFn = () => ({ result: '7', type: 'int' });
   const fake: ISessionAdapter = {
     async startDebugging(name)      { return name === 'Debug Backend' ? ENTRY : null; },
@@ -38,16 +38,16 @@ function makeSession(overrides: {
         : { variables: [{ name: 'a', value: '0', type: 'int' }] };
     },
   };
-  return new SessionManager(fake);
+  return new DebugStateMachine(fake);
 }
 
-async function startedSession(overrides = {}): Promise<SessionManager> {
+async function startedSession(overrides = {}): Promise<DebugStateMachine> {
   const sm = makeSession(overrides);
   await sm.start('Debug Backend');
   return sm;
 }
 
-describe('SessionManager — inspection (Sprint 4)', () => {
+describe('DebugStateMachine — inspection (Sprint 4)', () => {
 
   // ── print ──────────────────────────────────────────────────────────────────
 

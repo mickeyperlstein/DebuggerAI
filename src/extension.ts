@@ -18,7 +18,7 @@ import { VsCodeBreakpointAdapter }  from './adapters/VsCodeBreakpointAdapter';
 import { VsCodeDapProxy }           from './adapters/VsCodeDapProxy';
 import { VsCodeSessionAdapter }     from './adapters/VsCodeSessionAdapter';
 import { BreakpointManager }        from './breakpoints';
-import { SessionManager }           from './session';
+import { DebugStateMachine }        from './session';
 import { VsCodeCommandRegistry }    from './commands/VsCodeCommandRegistry';
 import { log, dispose as disposeLog } from './log';
 
@@ -37,6 +37,7 @@ function ensureServer(ctx: vscode.ExtensionContext, port: number): void {
   //       by the test harness or the user manually), do not spawn a second one.
   // WHY:  Spawning two servers on the same port causes EADDRINUSE and prevents
   //       the extension from connecting at all.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const http = require('http') as typeof import('http');
   const probe = http.get(`http://127.0.0.1:${port}/`, res => {
     res.resume();
@@ -69,7 +70,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
   const dapProxy      = new VsCodeDapProxy(ctx);
   const sessionAdapter = new VsCodeSessionAdapter(dapProxy);
   const mgr           = new BreakpointManager(bpAdapter);
-  const sm            = new SessionManager(sessionAdapter);
+  const sm            = new DebugStateMachine(sessionAdapter);
 
   // Register VS Code command palette commands
   new VsCodeCommandRegistry(ctx, mgr, sm);

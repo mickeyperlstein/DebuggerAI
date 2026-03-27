@@ -1,10 +1,10 @@
 /**
  * Sprint 3 — Execution control (unit tests)
- * Tests SessionManager execution methods via a fake ISessionAdapter.
+ * Tests DebugStateMachine execution methods via a fake ISessionAdapter.
  * Semantic correctness (actually stops at the right line) is covered by sprint3.test.ts (e2e).
  */
 
-import { SessionManager } from '../session';
+import { DebugStateMachine } from '../session';
 import { ISessionAdapter, StopEvent, ExecCmd } from '../ISessionAdapter';
 
 const ENTRY: StopEvent = { file: '/app/app.py', line: 1, reason: 'entry' };
@@ -12,7 +12,7 @@ const ENTRY: StopEvent = { file: '/app/app.py', line: 1, reason: 'entry' };
 function makeSession(overrides: {
   execResult?: StopEvent | null;
   jumpResult?: StopEvent | { ok: false; error: string };
-} = {}): SessionManager {
+} = {}): DebugStateMachine {
   const fake: ISessionAdapter = {
     async startDebugging(name) { return name === 'Debug Backend' ? ENTRY : null; },
     async stopDebugging() {},
@@ -32,16 +32,16 @@ function makeSession(overrides: {
     async scopes()   { return { scopes: [] }; },
     async variables(){ return { variables: [] }; },
   };
-  return new SessionManager(fake);
+  return new DebugStateMachine(fake);
 }
 
-async function startedSession(overrides = {}): Promise<SessionManager> {
+async function startedSession(overrides = {}): Promise<DebugStateMachine> {
   const sm = makeSession(overrides);
   await sm.start('Debug Backend');
   return sm;
 }
 
-describe('SessionManager — execution control (Sprint 3)', () => {
+describe('DebugStateMachine — execution control (Sprint 3)', () => {
 
   // ── continue ──────────────────────────────────────────────────────────────
 
@@ -154,7 +154,7 @@ describe('SessionManager — execution control (Sprint 3)', () => {
       async scopes()   { return { scopes: [] }; },
       async variables(){ return { variables: [] }; },
     };
-    const sm = new SessionManager(fake);
+    const sm = new DebugStateMachine(fake);
     await sm.start('Debug Backend');
     const r1 = await sm.next();
     const r2 = await sm.next();
