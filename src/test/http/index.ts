@@ -9,7 +9,7 @@
 import * as path  from 'path';
 import * as glob  from 'glob';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Mocha = require('mocha');
 
 export async function run(): Promise<void> {
