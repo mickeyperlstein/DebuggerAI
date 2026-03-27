@@ -15,6 +15,8 @@ import * as fs from 'fs';
 import { BusRouter } from '../../BusRouter';
 import { BusMessage } from '../../types';
 
+jest.setTimeout(60_000);
+
 const SERVER_TS    = path.resolve(__dirname, 'server.ts');
 const CLIENT_TS    = path.resolve(__dirname, 'client.ts');
 const PROJECT_ROOT = path.resolve(__dirname, '../../..');
@@ -187,7 +189,7 @@ it("Part 1: detects missing token at client breakpoint", async () => {
   unsubAll();
   kill(serverProc);
   kill(clientProc);
-}, 60_000);
+});
 
 // ── Part 2 ────────────────────────────────────────────────────────────────────
 
@@ -297,4 +299,4 @@ it("Part 2: after patching client, token flows end-to-end", async () => {
   unsubAll();
   kill(serverProc);
   kill(clientProc);
-}, 60_000);
+});
