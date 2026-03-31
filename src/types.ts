@@ -47,7 +47,7 @@ export interface ApiRequest {
     // Sprint 1 — breakpoints
     | 'set' | 'edit' | 'list' | 'clear' | 'clearAll'
     // Sprint 2 — session lifecycle
-    | 'start' | 'quit' | 'restart' | 'status'
+    | 'start' | 'quit' | 'restart' | 'status' | 'sessions'
     // Sprint 3 — execution control
     | 'continue' | 'next' | 'step' | 'return' | 'until' | 'jump'
     // Sprint 4 — inspection

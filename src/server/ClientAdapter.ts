@@ -84,6 +84,11 @@ export class ClientAdapter implements ISessionAdapter, IDebugAdapter {
       requestId: crypto.randomUUID(), variablesReference });
   }
 
+  listSessions(): Promise<any[]> {
+    return this.rpc<any[]>({ kind: 'command', type: 'listSessions',
+      requestId: crypto.randomUUID() });
+  }
+
   // ── IDebugAdapter ──────────────────────────────────────────────────────────
   // Fire-and-forget: BreakpointManager returns void; we send and don't block.
 

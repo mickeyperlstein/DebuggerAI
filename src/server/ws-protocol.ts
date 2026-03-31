@@ -30,12 +30,13 @@ export interface WsCmdScopes           extends WsCommandBase { type: 'scopes';  
 export interface WsCmdVariables        extends WsCommandBase { type: 'variables';        variablesReference: number; }
 export interface WsCmdAddBreakpoint    extends WsCommandBase { type: 'addBreakpoint';    file: string; line: number; condition?: string; enabled?: boolean; }
 export interface WsCmdRemoveBreakpoint extends WsCommandBase { type: 'removeBreakpoint'; file: string; line: number; }
+export interface WsCmdListSessions     extends WsCommandBase { type: 'listSessions'; }
 
 export type WsCommand =
   | WsCmdStartDebugging | WsCmdStopDebugging | WsCmdRestartDebugging
   | WsCmdSendExecution  | WsCmdSendUntil     | WsCmdSendJump
   | WsCmdEvaluate       | WsCmdScopes        | WsCmdVariables
-  | WsCmdAddBreakpoint  | WsCmdRemoveBreakpoint;
+  | WsCmdAddBreakpoint  | WsCmdRemoveBreakpoint | WsCmdListSessions;
 
 // ── Extension → Server (responses + events) ──────────────────────────────────
 

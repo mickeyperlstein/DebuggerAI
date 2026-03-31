@@ -19,6 +19,7 @@ import { WsReconnector }  from './WsReconnector';
 import { VsCodeDapProxy } from '../adapters/VsCodeDapProxy';
 import { VsCodeSessionAdapter } from '../adapters/VsCodeSessionAdapter';
 import { VsCodeBreakpointAdapter } from '../adapters/VsCodeBreakpointAdapter';
+import { SessionRegistry } from '../SessionRegistry';
 import {
   WsCommand, WsServerMessage, WsOkResponse, WsErrResponse,
   WsStoppedEvent, WsRegister,
@@ -31,6 +32,7 @@ export class VsCodeExtensionClient {
   private readonly proxy:          VsCodeDapProxy;
   private readonly sessionAdapter: VsCodeSessionAdapter;
   private readonly bpAdapter:      VsCodeBreakpointAdapter;
+  private readonly registry:       SessionRegistry;
 
   constructor(
     private readonly ctx:  vscode.ExtensionContext,
@@ -39,7 +41,9 @@ export class VsCodeExtensionClient {
     this.proxy          = new VsCodeDapProxy(ctx);
     this.sessionAdapter = new VsCodeSessionAdapter(this.proxy);
     this.bpAdapter      = new VsCodeBreakpointAdapter();
+    this.registry       = new SessionRegistry();
     this.ws             = new WsReconnector(`ws://127.0.0.1:${port}/__ws`);
+    ctx.subscriptions.push({ dispose: () => this.registry.dispose() });
   }
 
   connect(): void {
@@ -103,6 +107,8 @@ export class VsCodeExtensionClient {
       case 'startDebugging':   return this.sessionAdapter.startDebugging(cmd.configName);
       case 'stopDebugging':    return this.sessionAdapter.stopDebugging();
       case 'restartDebugging': return this.sessionAdapter.restartDebugging();
+      // Session discovery
+      case 'listSessions':     return this.registry.list();
       // Execution control
       case 'sendExecution':    return this.sessionAdapter.sendExecution(cmd.cmd);
       case 'sendUntil':        return this.sessionAdapter.sendUntil(cmd.file, cmd.line);

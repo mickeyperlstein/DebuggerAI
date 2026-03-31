@@ -7,7 +7,7 @@ import { SessionResult, StepResult, InspectResult } from './interfaces/IDebugger
 import { ClientRegistry } from './server/ClientRegistry';
 import { log } from './log';
 
-type Response = BpResult | BpListResult | SessionResult | StepResult | InspectResult;
+type Response = BpResult | BpListResult | SessionResult | StepResult | InspectResult | { sessions?: any[], ok?: boolean };
 
 /**
  * Thin HTTP server — localhost only.
@@ -76,6 +76,7 @@ export class Server {
       quit:     () => sm.quit(),
       restart:  () => sm.restart(),
       status:   () => sm.status(),
+      sessions: () => this.listSessions(),
       // Sprint 3 — execution control
       continue: () => sm.continue(),
       next:     () => sm.next(),
@@ -100,5 +101,13 @@ export class Server {
     const json = JSON.stringify(body);
     res.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(json) });
     res.end(json);
+  }
+
+  private listSessions(): { sessions: any[], ok: boolean } {
+    // WHAT: Return empty list — sessions are tracked by the extension via registry.
+    // WHY:  The HTTP API is stateless. The extension maintains the authoritative
+    //       session registry and returns it via the WS RPC path (ClientAdapter.listSessions).
+    // HOW:  This method is a fallback for the HTTP path; real clients use WS.
+    return { sessions: [], ok: true };
   }
 }

@@ -26,6 +26,7 @@ import { VsCodeDapProxy }    from './VsCodeDapProxy';
 import { LanguageStrategy }  from '../strategies/LanguageStrategy';
 import { NodeStrategy }      from '../strategies/NodeStrategy';
 import { PythonStrategy }    from '../strategies/PythonStrategy';
+import { DartStrategy }      from '../strategies/DartStrategy';
 
 const SESSION_START_TIMEOUT_MS   = 15_000;
 const SESSION_RESTART_TIMEOUT_MS = 15_000;
@@ -41,6 +42,7 @@ const STRATEGY_REGISTRY: Record<string, LanguageStrategy> = {
   'node2':    new NodeStrategy(),
   'python':   new PythonStrategy(),
   'debugpy':  new PythonStrategy(),
+  'dart':     new DartStrategy(),
 };
 
 const DEFAULT_STRATEGY: LanguageStrategy = new NodeStrategy();
