@@ -6,7 +6,7 @@
  */
 
 import WebSocket from 'ws';
-import { ISessionAdapter, StopEvent, ExecCmd, EvalResult } from '../../ISessionAdapter';
+import { ISessionAdapter, StopEvent, ExecCmd, EvalResult } from '../ISessionAdapter';
 
 interface CdpCallFrame {
   callFrameId: string;
@@ -175,7 +175,7 @@ export class NodeCdpAdapter implements ISessionAdapter {
   async sendJump(
     _file: string,
     _line: number,
-  ): Promise<{ file: string; line: number; reason: string } | { ok: false; error: string }> {
+  ): Promise<StopEvent | { ok: false; error: string }> {
     // CDP does not support arbitrary jump; return an error.
     return { ok: false, error: 'jump not supported via CDP' };
   }

@@ -61,6 +61,8 @@ npm run test:e2e
 
 This launches a real VS Code instance via `vscode-extension-tester`. It must pass before any sprint is considered done.
 
+**Important:** e2e test files use the `.e2e.ts` extension and run with **Mocha** via `vscode-extension-tester`. Do not use `jest.setTimeout()`, `jest.mock()`, or Jest's `expect()` in `.e2e.ts` files — use Mocha's `this.timeout()` and standard assertions (`assert`). Files with `.test.ts` extension (like `multi-session.test.ts`) are Jest unit tests and run with `npm test`.
+
 ### What is NOT acceptable as "done"
 
 - Unit tests only — not sufficient.

@@ -12,8 +12,6 @@ import { spawn, ChildProcess } from 'child_process';
 import * as path from 'path';
 import * as http from 'http';
 
-jest.setTimeout(120_000);
-
 describe('Test Explorer Session Discovery', () => {
   let vscodeProc: ChildProcess | undefined;
   const VS_CODE_EXECUTABLE = process.env.CODE_EXECUTABLE ?? 'code';

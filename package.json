@@ -2,7 +2,7 @@
   "name": "debugging-ai",
   "displayName": "DebuggingAI",
   "description": "Universal debugger control for any AI agent — Claude, Cline, Cursor, and more",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "mickeyperlstein",
   "license": "MIT",
   "icon": "images/icon.png",
