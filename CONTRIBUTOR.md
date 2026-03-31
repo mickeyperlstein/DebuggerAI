@@ -34,8 +34,10 @@ If a scenario is ambiguous, ask before implementing.
 1. Read every scenario in the relevant `.feature` file end-to-end.
 2. Find the code that needs to change (`src/`, `extension/`). Read it before editing it.
 3. Implement the minimum code that makes all scenarios pass. No extras, no speculative abstractions.
-4. Follow the code style rules: SOLID, minimal, DRY. No unnecessary comments, docstrings, or type annotations on unchanged code.
+4. Follow the code style rules: SOLID, strategy, minimal, VERY MINIMAL. DRY. No unnecessary comments, docstrings, or type annotations on unchanged code.
 5. Do not add error handling for impossible cases. Trust internal guarantees.
+6. Do not add features, refactor, or "improve" code that was not in scope.
+7. When editing a function or class, only modify the lines that are necessary to implement the feature. and add comments on WHY WHAT HOW only
 
 ---
 
