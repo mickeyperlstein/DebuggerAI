@@ -46,7 +46,7 @@ async function main() {
   delete process.env.ELECTRON_RUN_AS_NODE;
 
   const extensionDevelopmentPath = path.resolve(__dirname, '../../');
-  const extensionTestsPath       = path.resolve(__dirname, './suite/index');
+  const extensionTestsPath       = path.resolve(__dirname, '../e2e/index');
 
   // ── 1. Start standalone server ─────────────────────────────────────────────
   const serverProc = startServer();
