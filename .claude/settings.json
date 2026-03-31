@@ -8,7 +8,23 @@
       "mcp__debuggingai__list_breakpoints",
       "Bash(sips -z 128 128 /Users/mickeyperlstein/Documents/DebuggingAI/images/logo.png --out /Users/mickeyperlstein/Documents/DebuggingAI/images/icon.png)",
       "Bash(code --install-extension debugging-ai-0.2.0.vsix --force)",
-      "Bash(sips -z 512 512 /Users/mickeyperlstein/Documents/DebuggingAI/images/logo.png --out /Users/mickeyperlstein/Documents/DebuggingAI/images/logo_512.png)"
+      "Bash(sips -z 512 512 /Users/mickeyperlstein/Documents/DebuggingAI/images/logo.png --out /Users/mickeyperlstein/Documents/DebuggingAI/images/logo_512.png)",
+      "Read(//Users/mickeyperlstein/Documents/Book/**)",
+      "Read(//Users/mickeyperlstein/Documents/perli/**)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(gh:*)",
+      "Bash(node_modules/.bin/jest --version)",
+      "Bash(otool -L ~/Documents/tts/piper/piper)",
+      "Read(//Users/mickeyperlstein/Documents/tts/piper/**)"
     ]
   },
   "hooks": {

@@ -166,10 +166,20 @@ const TOOLS: Tool[] = [
   // ── Inspection ─────────────────────────────────────────────────────────────
   {
     name: 'print',
-    description: 'Evaluate and print the value of an expression in the current frame.',
+    description: 'Evaluate and print the value of one or more expressions in the current frame. ' +
+      'Accepts a single expression string or an array of variable/expression names. ' +
+      'Always returns an array of { name, value } objects — single expressions return an array of length 1.',
     inputSchema: {
       type: 'object',
-      properties: { expression: { type: 'string', description: 'Expression to evaluate (e.g. "a + b")' } },
+      properties: {
+        expression: {
+          oneOf: [
+            { type: 'string', description: 'Single expression to evaluate (e.g. "a + b")' },
+            { type: 'array', items: { type: 'string' }, description: 'Array of expressions to evaluate' },
+          ],
+          description: 'Expression or array of expressions to evaluate',
+        },
+      },
       required: ['expression'],
     },
   },
@@ -238,7 +248,19 @@ async function dispatch(name: string, args: Record<string, unknown>): Promise<un
     case 'step_out':             return call('return');
     case 'run_until':            return call('until',       { line: args.line });
     case 'jump_to':              return call('jump',        { line: args.line });
-    case 'print':                return call('print',       { expression: args.expression });
+    case 'print': {
+      // Array-first value protocol: accept string or string[]. Always return { name, value }[].
+      const expressions = Array.isArray(args.expression)
+        ? (args.expression as string[])
+        : [args.expression as string];
+      const results = await Promise.all(
+        expressions.map(async expr => {
+          const r = await call('print', { expression: expr }) as { ok: boolean; valueRepr?: string; error?: string };
+          return { name: expr, value: r.ok ? (r.valueRepr ?? null) : null, error: r.ok ? undefined : r.error };
+        }),
+      );
+      return results;
+    }
     case 'whatis':               return call('whatis',      { expression: args.expression });
     case 'exec':                 return call('exec',        { expression: args.expression });
     case 'watch':                return call('display',     { expression: args.expression });

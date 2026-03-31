@@ -1,14 +1,14 @@
 /**
  * Sprint 2 — Session lifecycle
- * Tests SessionManager directly with a fake ISessionAdapter (no vscode, no network).
+ * Tests DebugStateMachine directly with a fake ISessionAdapter (no vscode, no network).
  */
 
-import { SessionManager } from '../session';
+import { DebugStateMachine } from '../session';
 import { ISessionAdapter, StopEvent } from '../ISessionAdapter';
 
 const ENTRY: StopEvent = { file: '/app/app.py', line: 1, reason: 'entry' };
 
-function makeSession(): SessionManager {
+function makeSession(): DebugStateMachine {
   const fake: ISessionAdapter = {
     async startDebugging(name): Promise<StopEvent | null> {
       return name === 'Debug Backend' ? ENTRY : null;
@@ -22,11 +22,11 @@ function makeSession(): SessionManager {
     async scopes()   { return { scopes: [] }; },
     async variables(){ return { variables: [] }; },
   };
-  return new SessionManager(fake);
+  return new DebugStateMachine(fake);
 }
 
-describe('SessionManager — session lifecycle (Sprint 2)', () => {
-  let sm: SessionManager;
+describe('DebugStateMachine — session lifecycle (Sprint 2)', () => {
+  let sm: DebugStateMachine;
   beforeEach(() => { sm = makeSession(); });
 
   test('start returns state:paused for a valid config', async () => {

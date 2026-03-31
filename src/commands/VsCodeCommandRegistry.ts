@@ -11,7 +11,7 @@
 
 import * as vscode from 'vscode';
 import { BreakpointManager } from '../breakpoints';
-import { SessionManager }    from '../session';
+import { DebugStateMachine } from '../session';
 
 import { cmdSet, cmdEdit, cmdList, cmdClear, cmdClearAll } from '../commands';
 import {
@@ -25,7 +25,7 @@ export class VsCodeCommandRegistry {
   constructor(
     ctx: vscode.ExtensionContext,
     mgr: BreakpointManager,
-    sm:  SessionManager,
+    sm:  DebugStateMachine,
   ) {
     const reg = (id: string, fn: (...a: any[]) => any) =>
       ctx.subscriptions.push(vscode.commands.registerCommand(id, fn));

@@ -18,7 +18,7 @@
  */
 
 import { BreakpointManager } from '../src/breakpoints';
-import { SessionManager }    from '../src/session';
+import { DebugStateMachine } from '../src/session';
 import { ClientAdapter }     from '../src/server/ClientAdapter';
 import { ClientRegistry }    from '../src/server/ClientRegistry';
 import { Server }            from '../src/server';
@@ -28,10 +28,10 @@ const host     = process.env.DEBUGAI_HOST ?? '0.0.0.0';
 const registry = new ClientRegistry();
 const adapter  = new ClientAdapter(registry);
 const mgr      = new BreakpointManager(adapter);
-const sm       = new SessionManager(adapter);
+const sm       = new DebugStateMachine(adapter);
 const server   = new Server(mgr, sm, port, registry, host);
 
-// Keep SessionManager in sync when the human steps manually in VS Code.
+// Keep DebugStateMachine in sync when the human steps manually in VS Code.
 adapter.onStopEvent(ev => {
   if (ev.reason === 'exited') {
     sm.setExited();

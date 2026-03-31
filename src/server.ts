@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { WebSocketServer } from 'ws';
 import { BreakpointManager } from './breakpoints';
-import { SessionManager } from './session';
+import { DebugStateMachine } from './session';
 import { ApiRequest, BpResult, BpListResult } from './types';
 import { SessionResult, StepResult, InspectResult } from './interfaces/IDebugger';
 import { ClientRegistry } from './server/ClientRegistry';
@@ -19,7 +19,7 @@ export class Server {
 
   constructor(
     private readonly mgr: BreakpointManager,
-    private readonly sm: SessionManager,
+    private readonly sm: DebugStateMachine,
     private readonly port: number,
     registry?: ClientRegistry,
     private readonly host: string = '127.0.0.1',

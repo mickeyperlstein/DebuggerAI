@@ -6,8 +6,11 @@ import { log } from './log';
 /**
  * Pure session state machine.
  * No vscode imports — depends only on ISessionAdapter (injected).
+ *
+ * Renamed from SessionManager → DebugStateMachine to avoid collision with the
+ * upcoming SessionManager package (multi-session bus layer).
  */
-export class SessionManager {
+export class DebugStateMachine {
   private state: SessionState = 'idle';
   private sessionId: string | null = null;
   private file: string | null = null;
