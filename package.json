@@ -34,6 +34,15 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "bin": {
+    "debugging-ai-mcp": "./out/clients/mcp/index.js"
+  },
+  "files": [
+    "out/",
+    "images/icon.png",
+    "README.MD",
+    "LICENSE"
+  ],
   "contributes": {
     "commands": [
       {
