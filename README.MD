@@ -2,9 +2,9 @@
 
 ![DebuggingAI](images/logo_512.png)
 
-> Universal debugger control for any AI agent.
+DebuggerAI is a VS Code extension that exposes the Debug Adapter Protocol (DAP) as a tool interface via MCP, enabling AI agents ( Claude Code, Cline, Cursor, Copilot Workspace, local LLMs) can set breakpoints, inspect state, and drive a live debug session without knowing VS Code internals.
 
-DebuggingAI is a VS Code extension that exposes debugger control as a tool interface — so any AI agent (Claude Code, Cline, Cursor, Copilot Workspace, local LLMs) can set breakpoints, inspect state, and drive a debug session without knowing VS Code internals.
+> Universal debugger control for any AI agent.as a generic tool
 
 ## Positioningicon to readme
 
