@@ -130,17 +130,34 @@ startCommand:
 
 ## 5. Official MCP Registry
 
+> **Note on `modelcontextprotocol/servers` (GitHub):** That repo has 83k stars and
+> looks like the place to submit — but it **no longer accepts new server implementations**.
+> The README list is explicitly deprecated and will be removed. All new submissions
+> are redirected here instead.
+
 **URL:** https://registry.modelcontextprotocol.io  
 **Script:** `submits/scripts/publish-official-mcp-registry.sh`  
 **CI:** Uses GitHub OIDC (no secret needed in CI — the token is minted automatically)  
-**Local:** Run `mcp-publisher login` once
+**Local:** Run `mcp-publisher login github` once
 
 ### One-time setup (local only)
 ```bash
 npm install -g @modelcontextprotocol/mcp-publisher
-mcp-publisher login          # opens browser for GitHub OAuth
+mcp-publisher login github   # opens browser GitHub device-flow
 ```
 In CI, GitHub OIDC is used automatically — no secret required.
+
+### Required: `mcpName` in `package.json`
+The registry requires this field (already present):
+```json
+"mcpName": "io.github.mickeyperlstein/debuggingai"
+```
+The format **must** be `io.github.<owner>/<repo>`.
+
+### Generating `server.json`
+The script runs `mcp-publisher init` to generate the manifest, then patches in
+the correct values from `package.json` automatically. You can also run it
+manually and edit by hand.
 
 ### What the script does
 - Writes `server.json` with the server metadata (name, description, packages)

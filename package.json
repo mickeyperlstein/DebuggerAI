@@ -4,6 +4,7 @@
   "description": "Universal debugger control for any AI agent — Claude, Cline, Cursor, and more",
   "version": "0.2.2",
   "publisher": "mickeyperlstein",
+  "mcpName": "io.github.mickeyperlstein/debuggingai",
   "license": "MIT",
   "icon": "images/icon.png",
   "repository": {
