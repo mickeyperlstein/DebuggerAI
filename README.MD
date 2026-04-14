@@ -1,6 +1,6 @@
-# DebuggingAI
+# DebuggerAI
 
-![DebuggingAI](images/logo_512.png)
+![DebuggerAI](images/logo_512.png)
 
 DebuggerAI is a VS Code extension that exposes the Debug Adapter Protocol (DAP) as a tool interface via MCP, enabling AI agents ( Claude Code, Cline, Cursor, Copilot Workspace, local LLMs) can set breakpoints, inspect state, and drive a live debug session without knowing VS Code internals.
 
@@ -9,12 +9,12 @@ DebuggerAI is a VS Code extension that exposes the Debug Adapter Protocol (DAP) 
 ## Positioningicon to readme
 
 Most AI coding agents can read and write files. None can control the debugger.
-DebuggingAI bridges that gap — agent-agnostic, runtime-agnostic, built on VS Code's native debug API and the Debug Adapter Protocol.
+DebuggerAI bridges that gap — agent-agnostic, runtime-agnostic, built on VS Code's native debug API and the Debug Adapter Protocol.
 
 ```
 Agent (Claude / Cline / any)
         ↓
-  DebuggingAI extension   ←  also accepts manual gutter clicks
+  DebuggerAI extension   ←  also accepts manual gutter clicks
         ↓  DAP
   debugpy / node / delve / dart …
         ↓
@@ -40,15 +40,15 @@ npm run compile
 
 ```bash
 # local Node.js (stdio transport — default when using --)
-claude mcp add debuggingai -- node /absolute/path/to/DebuggingAI/out/clients/mcp/index.js
+claude mcp add debuggerai -- node /absolute/path/to/DebuggerAI/out/clients/mcp/index.js
 
 # Docker (no local Node.js required)
-claude mcp add debuggingai -- docker run --rm -i \
+claude mcp add debuggerai -- docker run --rm -i \
   -e DEBUGAI_HOST=host.docker.internal \
-  pitronot/debuggingai:latest node out/clients/mcp/index.js
+  pitronot/debuggerai:latest node out/clients/mcp/index.js
 
 # With custom port
-claude mcp add --env DEBUGAI_PORT=9000 debuggingai -- node /absolute/path/to/DebuggingAI/out/clients/mcp/index.js
+claude mcp add --env DEBUGAI_PORT=9000 debuggerai -- node /absolute/path/to/DebuggerAI/out/clients/mcp/index.js
 ```
 
 **Claude Desktop / Cline / Cursor — `claude_desktop_config.json`**
@@ -62,9 +62,9 @@ The config file is at:
 ```json
 {
   "mcpServers": {
-    "debuggingai": {
+    "debuggerai": {
       "command": "node",
-      "args": ["/absolute/path/to/DebuggingAI/out/clients/mcp/index.js"]
+      "args": ["/absolute/path/to/DebuggerAI/out/clients/mcp/index.js"]
     }
   }
 }
@@ -75,12 +75,12 @@ The config file is at:
 ```json
 {
   "mcpServers": {
-    "debuggingai": {
+    "debuggerai": {
       "command": "docker",
       "args": [
         "run", "--rm", "-i",
         "-e", "DEBUGAI_HOST=host.docker.internal",
-        "pitronot/debuggingai:latest",
+        "pitronot/debuggerai:latest",
         "node", "out/clients/mcp/index.js"
       ]
     }
@@ -88,9 +88,9 @@ The config file is at:
 }
 ```
 
-> **Note:** `host.docker.internal` lets the container reach the DebuggingAI server running on your host machine (macOS/Windows). On Linux, use `--network host` and omit `DEBUGAI_HOST`.
+> **Note:** `host.docker.internal` lets the container reach the DebuggerAI server running on your host machine (macOS/Windows). On Linux, use `--network host` and omit `DEBUGAI_HOST`.
 
-**3. Start the DebuggingAI server**
+**3. Start the DebuggerAI server**
 
 The VS Code extension auto-starts the server when it activates. Or start it manually:
 
